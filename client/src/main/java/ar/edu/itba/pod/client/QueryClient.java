@@ -2,10 +2,6 @@ package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.client.helpers.CSVhelper;
 import ar.edu.itba.pod.client.helpers.CommandLineHelper;
-import ar.edu.itba.pod.constants.ElectionsState;
-import ar.edu.itba.pod.constants.VotingDimension;
-import ar.edu.itba.pod.exceptions.IllegalActionException;
-import ar.edu.itba.pod.services.QueryService;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,50 +21,50 @@ public class QueryClient {
 
         CommandLine cmd = getOptions(args);
         String ip = "//" + cmd.getOptionValue("DserverAddress") + "/queryService";
-        QueryService queryService;
-        try {
-            queryService = (QueryService) Naming.lookup(ip);
-        }catch (Exception e){
-            System.out.println("Bad ip");
-            return;
-        }
-
-        String state = cmd.getOptionValue("Dstate");
-        String table = cmd.getOptionValue("Did");
-        if(state!=null && table!= null){
-            System.out.println("Bad input. Please select state or table, not both.");
-            return;
-        }
-
-        Map.Entry<Map<String, Double>, ElectionsState> results = null;
-
-        try {
-            if (state != null) {
-                results = queryService.getResults(VotingDimension.PROVINCE, state);
-            }
-            if (table != null) {
-                results = queryService.getResults(VotingDimension.TABLE, table);
-            }
-            if (state == null && table == null) {
-                results = queryService.getResults(VotingDimension.NATIONAL, null);
-            }
-        } catch (RemoteException e){
-            System.out.println("Could not connect to server.");
-            System.exit(1);
-        } catch (IllegalActionException e) {
-            System.out.println("Illegal Action: " + e.getMessage());
-            System.exit(1);
-        }
-
-        if (results.getValue() == ElectionsState.FINISHED && table == null && !results.getKey().isEmpty()){
-            String winnerString = results.getKey().keySet().stream().collect(Collectors.joining(","));
-            System.out.println(winnerString + " won the election");
-        }
-
-        if (!results.getKey().isEmpty()){
-            String outFile = cmd.getOptionValue("DoutPath");
-            CSVhelper.writeCsv(outFile, results.getKey());
-        }
+//        QueryService queryService;
+//        try {
+//            queryService = (QueryService) Naming.lookup(ip);
+//        }catch (Exception e){
+//            System.out.println("Bad ip");
+//            return;
+//        }
+//
+//        String state = cmd.getOptionValue("Dstate");
+//        String table = cmd.getOptionValue("Did");
+//        if(state!=null && table!= null){
+//            System.out.println("Bad input. Please select state or table, not both.");
+//            return;
+//        }
+//
+//        Map.Entry<Map<String, Double>, ElectionsState> results = null;
+//
+//        try {
+//            if (state != null) {
+//                results = queryService.getResults(VotingDimension.PROVINCE, state);
+//            }
+//            if (table != null) {
+//                results = queryService.getResults(VotingDimension.TABLE, table);
+//            }
+//            if (state == null && table == null) {
+//                results = queryService.getResults(VotingDimension.NATIONAL, null);
+//            }
+//        } catch (RemoteException e){
+//            System.out.println("Could not connect to server.");
+//            System.exit(1);
+//        } catch (IllegalActionException e) {
+//            System.out.println("Illegal Action: " + e.getMessage());
+//            System.exit(1);
+//        }
+//
+//        if (results.getValue() == ElectionsState.FINISHED && table == null && !results.getKey().isEmpty()){
+//            String winnerString = results.getKey().keySet().stream().collect(Collectors.joining(","));
+//            System.out.println(winnerString + " won the election");
+//        }
+//
+//        if (!results.getKey().isEmpty()){
+//            String outFile = cmd.getOptionValue("DoutPath");
+//            CSVhelper.writeCsv(outFile, results.getKey());
+//        }
     }
 
     private static CommandLine getOptions(String[] args){
