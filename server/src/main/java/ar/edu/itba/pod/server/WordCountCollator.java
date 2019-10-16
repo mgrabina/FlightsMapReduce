@@ -1,4 +1,4 @@
 package ar.edu.itba.pod.server;
 
-public class Server {
+public class WordCountCollator {
 }
