@@ -1,5 +1,3 @@
-package ar.edu.itba.pod.api.models;
-
 import java.io.Serializable;
 
 public class Flight implements Serializable {
@@ -62,7 +60,7 @@ public class Flight implements Serializable {
         }
     }
 
-    public Flight(ar.edu.itba.pod.api.models.Flight.FlightType flightType, ar.edu.itba.pod.api.models.Flight.MovementType movementType, ar.edu.itba.pod.api.models.Flight.FlightClass flightClass, String srcOaci, String destOaci) {
+    public Flight(Flight.FlightType flightType, Flight.MovementType movementType, Flight.FlightClass flightClass, String srcOaci, String destOaci) {
         this.flightType = flightType;
         this.movementType = movementType;
         this.flightClass = flightClass;
@@ -70,27 +68,27 @@ public class Flight implements Serializable {
         this.destOaci = destOaci;
     }
 
-    public ar.edu.itba.pod.api.models.Flight.FlightType getFlightType() {
+    public Flight.FlightType getFlightType() {
         return flightType;
     }
 
-    public void setFlightType(ar.edu.itba.pod.api.models.Flight.FlightType flightType) {
+    public void setFlightType(Flight.FlightType flightType) {
         this.flightType = flightType;
     }
 
-    public ar.edu.itba.pod.api.models.Flight.MovementType getMovementType() {
+    public Flight.MovementType getMovementType() {
         return movementType;
     }
 
-    public void setMovementType(ar.edu.itba.pod.api.models.Flight.MovementType movementType) {
+    public void setMovementType(Flight.MovementType movementType) {
         this.movementType = movementType;
     }
 
-    public ar.edu.itba.pod.api.models.Flight.FlightClass getFlightClass() {
+    public Flight.FlightClass getFlightClass() {
         return flightClass;
     }
 
-    public void setFlightClass(ar.edu.itba.pod.api.models.Flight.FlightClass flightClass) {
+    public void setFlightClass(Flight.FlightClass flightClass) {
         this.flightClass = flightClass;
     }
 

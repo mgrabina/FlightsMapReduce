@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.server;
+package helpers;
 
 import com.hazelcast.mapreduce.Collator;
 

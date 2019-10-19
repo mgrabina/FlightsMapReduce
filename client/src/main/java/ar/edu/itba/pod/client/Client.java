@@ -1,6 +1,8 @@
 package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.client.helpers.CommandLineHelper;
+import ar.edu.itba.pod.*;
+import ar.edu.itba.pod.client.helpers.CSVhelper;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.core.HazelcastInstance;
@@ -22,20 +24,19 @@ public class Client {
         hazelcastCfg = new ClientConfig();
         hazelcastCfg.getGroupConfig().setName("lity").setPassword("lito123");
         hInstance = HazelcastClient.newHazelcastClient(hazelcastCfg);
-
         final IList<Airport> airportsList = hInstance.getList("airport-list");
         final IList<Flight> flightsList = hInstance.getList("flights-list");
         airportsList.clear();
         flightsList.clear();
 
-        CSVHelper.loadAirpors(airportsList, "");
+        CSVhelper.loadAirpors(airportsList, "");
 
         final KeyValueSource<String, String> airportSource = KeyValueSource.fromList(airportsList);
         final KeyValueSource<String, String> flightsSource = KeyValueSource.fromList(flightsList);
 
 
 
-        
+
     }
 
     private static CommandLine getOptions(String[] args){

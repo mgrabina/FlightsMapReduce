@@ -1,5 +1,3 @@
-package ar.edu.itba.pod.api.models;
-
 import java.io.Serializable;
 
 public class Airport implements Serializable {

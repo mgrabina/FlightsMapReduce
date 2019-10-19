@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 public class Server {
     public static void main(String[] args) {
 
+        // TODO Chekear esto, creo que no deberia hacer nada el server
+
         Config cfg = new Config();
         cfg.getGroupConfig().setName("lity").setPassword("lito123");
 
