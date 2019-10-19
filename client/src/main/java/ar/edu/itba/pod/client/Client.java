@@ -1,8 +1,9 @@
 package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.api.Airport;
-import ar.edu.itba.pod.api.Flight;
-import ar.edu.itba.pod.client.helpers.CommandLineHelper;
+import ar.edu.itba.pod.api.Movement;
+import ar.edu.itba.pod.api.mappers.MovementsByAirportMapper;
+import ar.edu.itba.pod.api.reducers.MovementsByAirportReducer;
 import ar.edu.itba.pod.client.helpers.CSVhelper;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
@@ -11,10 +12,8 @@ import com.hazelcast.core.ICompletableFuture;
 import com.hazelcast.core.IList;
 import com.hazelcast.core.ReplicatedMap;
 import com.hazelcast.mapreduce.Job;
-import com.hazelcast.mapreduce.JobCompletableFuture;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
-import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +44,7 @@ public class Client {
         hazelcastCfg.getGroupConfig().setName("lity").setPassword("lito123");
         hInstance = HazelcastClient.newHazelcastClient(hazelcastCfg);
         final ReplicatedMap<String, Airport> airportsMap = hInstance.getReplicatedMap("airport-list");
-        final IList<Flight> flightsList = hInstance.getList("flights-list");
+        final IList<Movement> flightsList = hInstance.getList("flights-list");
         airportsMap.clear();
         flightsList.clear();
 
@@ -53,14 +52,14 @@ public class Client {
         CSVhelper.loadAirports(airportsMap, airportDataFile);
         CSVhelper.loadFlights(flightsList, flightsDataFile);
 
-        final KeyValueSource<String, Flight> flightsSource = KeyValueSource.fromList(flightsList);
+        final KeyValueSource<String, Movement> flightsSource = KeyValueSource.fromList(flightsList);
 
         JobTracker jobTracker = hInstance.getJobTracker("default");
-        Job<String, Flight> job = jobTracker.newJob(flightsSource);
+        Job<String, Movement> job = jobTracker.newJob(flightsSource);
 
 //        switch (commandLine.getOptionValue("query")){
         switch ("1"){
-            case "1": query1(airportsMap, flightsSource, job); break;
+            case "1": query1(job, airportsMap); break;
             case "2": query2(airportsMap, flightsSource, job); break;
             case "3": query3(airportsMap, flightsSource, job); break;
             case "4": query4(airportsMap, flightsSource, job); break;
@@ -70,49 +69,49 @@ public class Client {
         }
     }
 
-    private static void query1(ReplicatedMap<String, Airport> airportsMap,
-                               KeyValueSource<String, Flight> flights,
-                               Job job
-                               ){
-//        ICompletableFuture<Map<String, Long>> future2 = job
-//                .mapper( new TokenizerMapper() )
-//                .reducer( new WordCountReducerFactory() )
-//                .submit();
-//        try {
-//            Map<String, Long> result = future2.get();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        } catch (ExecutionException e) {
-//            e.printStackTrace();
-//        }
+    private static void query1(Job job, Map<String, Airport> airports){
+        ICompletableFuture<Map<String, Integer>> future = job
+                .mapper( new MovementsByAirportMapper() )
+                .reducer( new MovementsByAirportReducer() )
+                .submit();
+        try {
+            Map<String, Integer> result = future.get();
+            CSVhelper.writeQuery1Csv("query1.csv", result, airports);
+        } catch (InterruptedException e) {  // TODO: More explicit error messages.
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private static void query2(ReplicatedMap<String, Airport> airportsMap,
-                               KeyValueSource<String, Flight> flights,
+                               KeyValueSource<String, Movement> flights,
                                Job job
                                ){
     }
 
     private static void query3(ReplicatedMap<String, Airport> airportsMap,
-                               KeyValueSource<String, Flight> flights,
+                               KeyValueSource<String, Movement> flights,
                                Job job
                                ){
     }
 
     private static void query4(ReplicatedMap<String, Airport> airportsMap,
-                               KeyValueSource<String, Flight> flights,
+                               KeyValueSource<String, Movement> flights,
                                Job job
                                ){
     }
 
     private static void query5(ReplicatedMap<String, Airport> airportsMap,
-                               KeyValueSource<String, Flight> flights,
+                               KeyValueSource<String, Movement> flights,
                                Job job
                                ){
     }
 
     private static void query6(ReplicatedMap<String, Airport> airportsMap,
-                               KeyValueSource<String, Flight> flights,
+                               KeyValueSource<String, Movement> flights,
                                Job job
                                ){
     }

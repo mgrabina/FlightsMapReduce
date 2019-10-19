@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class Flight implements Serializable {
+public class Movement implements Serializable {
 
     private FlightType flightType;
     private MovementType movementType;
@@ -87,7 +87,7 @@ public class Flight implements Serializable {
         }
     }
 
-    public Flight(Flight.FlightType flightType, Flight.MovementType movementType, Flight.FlightClass flightClass, String srcOaci, String destOaci) {
+    public Movement(Movement.FlightType flightType, Movement.MovementType movementType, Movement.FlightClass flightClass, String srcOaci, String destOaci) {
         this.flightType = flightType;
         this.movementType = movementType;
         this.flightClass = flightClass;
@@ -95,27 +95,27 @@ public class Flight implements Serializable {
         this.destOaci = destOaci;
     }
 
-    public Flight.FlightType getFlightType() {
+    public Movement.FlightType getFlightType() {
         return flightType;
     }
 
-    public void setFlightType(Flight.FlightType flightType) {
+    public void setFlightType(Movement.FlightType flightType) {
         this.flightType = flightType;
     }
 
-    public Flight.MovementType getMovementType() {
+    public Movement.MovementType getMovementType() {
         return movementType;
     }
 
-    public void setMovementType(Flight.MovementType movementType) {
+    public void setMovementType(Movement.MovementType movementType) {
         this.movementType = movementType;
     }
 
-    public Flight.FlightClass getFlightClass() {
+    public Movement.FlightClass getFlightClass() {
         return flightClass;
     }
 
-    public void setFlightClass(Flight.FlightClass flightClass) {
+    public void setFlightClass(Movement.FlightClass flightClass) {
         this.flightClass = flightClass;
     }
 
@@ -137,7 +137,7 @@ public class Flight implements Serializable {
 
     @java.lang.Override
     public java.lang.String toString() {
-        return "ar.edu.itba.pod.api.Flight{" +
+        return "ar.edu.itba.pod.api.Movement{" +
                 "flightType=" + flightType.toString() +
                 ", movementType=" + movementType.toString() +
                 ", flightClass=" + flightClass.toString() +
