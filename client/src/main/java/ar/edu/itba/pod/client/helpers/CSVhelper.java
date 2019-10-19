@@ -22,90 +22,79 @@ import static java.util.stream.Collectors.toMap;
 
 public class CSVhelper {
 
-    public static int parseData(String file, VoteCreator voteCreator) throws RemoteException {
+    public static void loadAirports(IList<Airport> list, String file) {
 
         CSVParser csvParser = null;
-        int voteCount = 0;
 
         try {
             Reader reader = Files.newBufferedReader(Paths.get(file));
-            csvParser = new CSVParser(reader, CSVFormat.newFormat(';'));
+            csvParser = new CSVParser(reader, CSVFormat.newFormat(';').withFirstRecordAsHeader());
         } catch (IOException ex) {
             System.out.println("Error while parsing csv file.");
         }
 
         for (CSVRecord csvRecord : csvParser) {
 
-            String table = csvRecord.get(0);
-            String province = csvRecord.get(1);
-            String[] choices = csvRecord.get(2).split(",");
+            String oaci = csvRecord.get(1);
+            String denomination = csvRecord.get(4);
+            String province = csvRecord.get(20);
 
-            voteCreator.create(table, province, choices[0], choices.length >= 2 ? choices[1] : null, choices.length == 3 ? choices[2] : null);
-            voteCount++;
+            Airport a = new Airport(oaci, denomination, province);
+            list.add(a);
         }
-
-        return voteCount;
     }
 
-    public static void writeCsv(String file, Map<String, Double> results) {
+    public static void loadFlights(IList<Airport> list, String file) {
+
+        CSVParser csvParser = null;
 
         try {
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
-            final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
-                    .withHeader("Porcentaje", "Partido").withRecordSeparator('\n'));
+            Reader reader = Files.newBufferedReader(Paths.get(file));
+            csvParser = new CSVParser(reader, CSVFormat.newFormat(';').withFirstRecordAsHeader());
+        } catch (IOException ex) {
+            System.out.println("Error while parsing csv file.");
+        }
 
-            results.entrySet().stream().sorted((o1, o2) -> {
-                if(!o1.getValue().equals(o2.getValue()))
-                    return Double.compare(o2.getValue(),o1.getValue());
-                return o1.getKey().compareTo(o2.getKey());
-            }).forEach(entry -> {
-                String party = entry.getKey();
-                DecimalFormat format = new DecimalFormat("##.00");
-                String percent = format.format(entry.getValue() * 100) + "%";
-                try {
-                    csvPrinter.printRecord(percent, party);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            csvPrinter.flush();
+        for (CSVRecord csvRecord : csvParser) {
 
-        } catch (IOException e){
-            System.out.println("Error while printing csv file.");
+            FlightType fType = FlightType(csvRecord.get(2));
+            MovementType movementType = MovementType(csvRecord.get(3));
+            FlightClass flightClass = FlightClass(csvRecord.get(4));
+            String srcOaci = csvRecord.get(5);
+            String destOaci = csvRecord.get(6);
+
+            Flight f = new Flight(fType, movementType, flightClass, srcOaci, destOaci);
+            list.add(a);
         }
     }
 
-    public static void generateRandomData() {
+//    public static void writeCsv(String file, Map<String, Double> results) {
+//
+//        try {
+//            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
+//            final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
+//                    .withHeader("Porcentaje", "Partido").withRecordSeparator('\n'));
+//
+//            results.entrySet().stream().sorted((o1, o2) -> {
+//                if(!o1.getValue().equals(o2.getValue()))
+//                    return Double.compare(o2.getValue(),o1.getValue());
+//                return o1.getKey().compareTo(o2.getKey());
+//            }).forEach(entry -> {
+//                String party = entry.getKey();
+//                DecimalFormat format = new DecimalFormat("##.00");
+//                String percent = format.format(entry.getValue() * 100) + "%";
+//                try {
+//                    csvPrinter.printRecord(percent, party);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            });
+//            csvPrinter.flush();
+//
+//        } catch (IOException e){
+//            System.out.println("Error while printing csv file.");
+//        }
+//    }
 
-        CSVPrinter csvPrinter = null;
-        List<String> parties = Arrays.asList("GORILLA","LEOPARD","TURTLE","OWL","TIGER","TARSIER","MONKEY","LYNX",
-                "WHITE_TIGER","WHITE_GORILLA","SNAKE","JACKALOPE","BUFFALO");
-        List<String> provinces = Arrays.asList("JUNGLE");
-        Random r = new Random();
-
-        try {
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get("votos.csv"));
-            csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';').withRecordSeparator('\n'));
-            int randomSize = ThreadLocalRandom.current().nextInt(5000,10000);
-            for (int i = 1; i < randomSize ; i++) {
-                String table = String.valueOf(r.nextInt(1000) + 1000);
-                String province = provinces.get(r.nextInt(provinces.size()));
-
-                int polNumber = r.nextInt(3) + 1;
-                List<String> selectedParties = new LinkedList<>();
-                IntStream.rangeClosed(1, polNumber).forEach(j -> {
-                    selectedParties.add(parties.get(r.nextInt(parties.size())));
-                });
-                String partiesStr = selectedParties.stream().collect(Collectors.joining(","));
-
-                csvPrinter.printRecord(table, province, partiesStr);
-            }
-
-            csvPrinter.flush();
-
-        } catch (IOException e){
-            System.out.println("Error while printing csv file.");
-        }
-    }
 
 }
