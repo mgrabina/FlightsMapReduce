@@ -1,64 +1,56 @@
 package ar.edu.itba.pod.client.helpers;
 
+import ar.edu.itba.pod.api.Airport;
+import ar.edu.itba.pod.api.Flight;
+import com.hazelcast.core.IList;
+import com.hazelcast.core.ReplicatedMap;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-
+import org.apache.commons.csv.CSVPrinter;
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.util.Map;
 
 public class CSVhelper {
-
-    public static void loadAirports(IList<Airport> list, String file) {
-
-        CSVParser csvParser = null;
-
+    public static void loadAirports(ReplicatedMap<String, Airport> map, String file) {
         try {
-            Reader reader = Files.newBufferedReader(Paths.get(file));
-            csvParser = new CSVParser(reader, CSVFormat.newFormat(';').withFirstRecordAsHeader());
+            CSVParser csvParser = new CSVParser(
+                    Files.newBufferedReader(Paths.get(file)),
+                    CSVFormat.newFormat(';').withFirstRecordAsHeader()
+            );
+            csvParser.forEach(csvRecord -> {
+                Airport a = new Airport(csvRecord.get(1), csvRecord.get(4), csvRecord.get(20));
+                map.putIfAbsent(a.getOaci(), a);
+            });
         } catch (IOException ex) {
-            System.out.println("Error while parsing csv file.");
-        }
-
-        for (CSVRecord csvRecord : csvParser) {
-
-            String oaci = csvRecord.get(1);
-            String denomination = csvRecord.get(4);
-            String province = csvRecord.get(20);
-
-            Airport a = new Airport(oaci, denomination, province);
-            list.add(a);
+            System.out.println("Error while parsing csv file. Exception: " + ex.getMessage());
         }
     }
 
-    public static void loadFlights(IList<Airport> list, String file) {
-
-        CSVParser csvParser = null;
-
+    public static void loadFlights(IList<Flight> list, String file) {
         try {
-            Reader reader = Files.newBufferedReader(Paths.get(file));
-            csvParser = new CSVParser(reader, CSVFormat.newFormat(';').withFirstRecordAsHeader());
+
+            CSVParser csvParser = new CSVParser(
+                    Files.newBufferedReader(Paths.get(file)),
+                    CSVFormat.newFormat(';').withFirstRecordAsHeader()
+            );
+            csvParser.forEach(csvRecord -> list.add(new Flight(
+                    Flight.FlightType.fromString(csvRecord.get(3)),
+                    Flight.MovementType.fromString(csvRecord.get(4)),
+                    Flight.FlightClass.fromString(csvRecord.get(2)),
+                    csvRecord.get(5),
+                    csvRecord.get(6))));
+        } catch (IllegalArgumentException ex){
+            System.out.println("Invalid value for enum. Exception: " + ex.getMessage());
         } catch (IOException ex) {
-            System.out.println("Error while parsing csv file.");
-        }
-
-        for (CSVRecord csvRecord : csvParser) {
-
-            Flight.FlightType fType = FlightType(csvRecord.get(2));
-            Flight.MovementType movementType = MovementType(csvRecord.get(3));
-            Flight.FlightClass flightClass = FlightClass(csvRecord.get(4));
-            String srcOaci = csvRecord.get(5);
-            String destOaci = csvRecord.get(6);
-
-            Flight f = new Flight(fType, movementType, flightClass, srcOaci, destOaci);
-            list.add(a);
+            System.out.println("Error while parsing csv file. Exception: " + ex.getMessage());
         }
     }
 
     public static void writeCsv(String file, Map<String, Double> results) {
-
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
@@ -79,11 +71,8 @@ public class CSVhelper {
                 }
             });
             csvPrinter.flush();
-
         } catch (IOException e){
             System.out.println("Error while printing csv file.");
         }
     }
-
-
 }
