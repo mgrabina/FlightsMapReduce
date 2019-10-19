@@ -1,54 +1,56 @@
 package ar.edu.itba.pod.client.helpers;
 
+import ar.edu.itba.pod.api.Airport;
+import ar.edu.itba.pod.api.Flight;
+import com.hazelcast.core.IList;
+import com.hazelcast.core.ReplicatedMap;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.CSVRecord;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.rmi.RemoteException;
 import java.text.DecimalFormat;
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static java.util.Map.Entry.comparingByValue;
-import static java.util.stream.Collectors.toMap;
+import java.util.Map;
 
 public class CSVhelper {
-
-    public static int parseData(String file, VoteCreator voteCreator) throws RemoteException {
-
-        CSVParser csvParser = null;
-        int voteCount = 0;
-
+    public static void loadAirports(ReplicatedMap<String, Airport> map, String file) {
         try {
-            Reader reader = Files.newBufferedReader(Paths.get(file));
-            csvParser = new CSVParser(reader, CSVFormat.newFormat(';'));
+            CSVParser csvParser = new CSVParser(
+                    Files.newBufferedReader(Paths.get(file)),
+                    CSVFormat.newFormat(';').withFirstRecordAsHeader()
+            );
+            csvParser.forEach(csvRecord -> {
+                Airport a = new Airport(csvRecord.get(1), csvRecord.get(4), csvRecord.get(20));
+                map.putIfAbsent(a.getOaci(), a);
+            });
         } catch (IOException ex) {
-            System.out.println("Error while parsing csv file.");
+            System.out.println("Error while parsing csv file. Exception: " + ex.getMessage());
         }
+    }
 
-        for (CSVRecord csvRecord : csvParser) {
+    public static void loadFlights(IList<Flight> list, String file) {
+        try {
 
-            String table = csvRecord.get(0);
-            String province = csvRecord.get(1);
-            String[] choices = csvRecord.get(2).split(",");
-
-            voteCreator.create(table, province, choices[0], choices.length >= 2 ? choices[1] : null, choices.length == 3 ? choices[2] : null);
-            voteCount++;
+            CSVParser csvParser = new CSVParser(
+                    Files.newBufferedReader(Paths.get(file)),
+                    CSVFormat.newFormat(';').withFirstRecordAsHeader()
+            );
+            csvParser.forEach(csvRecord -> list.add(new Flight(
+                    Flight.FlightType.fromString(csvRecord.get(3)),
+                    Flight.MovementType.fromString(csvRecord.get(4)),
+                    Flight.FlightClass.fromString(csvRecord.get(2)),
+                    csvRecord.get(5),
+                    csvRecord.get(6))));
+        } catch (IllegalArgumentException ex){
+            System.out.println("Invalid value for enum. Exception: " + ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println("Error while parsing csv file. Exception: " + ex.getMessage());
         }
-
-        return voteCount;
     }
 
     public static void writeCsv(String file, Map<String, Double> results) {
-
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
@@ -69,43 +71,8 @@ public class CSVhelper {
                 }
             });
             csvPrinter.flush();
-
         } catch (IOException e){
             System.out.println("Error while printing csv file.");
         }
     }
-
-    public static void generateRandomData() {
-
-        CSVPrinter csvPrinter = null;
-        List<String> parties = Arrays.asList("GORILLA","LEOPARD","TURTLE","OWL","TIGER","TARSIER","MONKEY","LYNX",
-                "WHITE_TIGER","WHITE_GORILLA","SNAKE","JACKALOPE","BUFFALO");
-        List<String> provinces = Arrays.asList("JUNGLE");
-        Random r = new Random();
-
-        try {
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get("votos.csv"));
-            csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';').withRecordSeparator('\n'));
-            int randomSize = ThreadLocalRandom.current().nextInt(5000,10000);
-            for (int i = 1; i < randomSize ; i++) {
-                String table = String.valueOf(r.nextInt(1000) + 1000);
-                String province = provinces.get(r.nextInt(provinces.size()));
-
-                int polNumber = r.nextInt(3) + 1;
-                List<String> selectedParties = new LinkedList<>();
-                IntStream.rangeClosed(1, polNumber).forEach(j -> {
-                    selectedParties.add(parties.get(r.nextInt(parties.size())));
-                });
-                String partiesStr = selectedParties.stream().collect(Collectors.joining(","));
-
-                csvPrinter.printRecord(table, province, partiesStr);
-            }
-
-            csvPrinter.flush();
-
-        } catch (IOException e){
-            System.out.println("Error while printing csv file.");
-        }
-    }
-
 }

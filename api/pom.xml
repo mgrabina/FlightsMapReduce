@@ -2,12 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>VotingSystem-parent</artifactId>
+    <artifactId>FlightsMapReduce</artifactId>
     <groupId>ar.edu.itba.pod</groupId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <groupId>ar.edu.itba.pod</groupId>
-  <artifactId>VotingSystem-api</artifactId>
+  <artifactId>FlightsMapReduce-api</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>VotingSystem-api</name>
+  <name>FlightsMapReduce-api</name>
+  <dependencies>
+    <dependency>
+      <groupId>com.hazelcast</groupId>
+      <artifactId>hazelcast-all</artifactId>
+      <version>3.6.5</version>
+    </dependency>
+  </dependencies>
 </project>
