@@ -4,6 +4,7 @@ import ar.edu.itba.pod.api.Airport;
 import ar.edu.itba.pod.api.Movement;
 import com.hazelcast.core.IList;
 import com.hazelcast.core.ReplicatedMap;
+import javafx.util.Pair;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -12,10 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CSVhelper {
     private static DecimalFormat df2 = new DecimalFormat("#.##");
@@ -145,6 +143,31 @@ public class CSVhelper {
                     e.printStackTrace();
                 }
             });
+            csvPrinter.flush();
+        } catch (IOException e){
+            System.out.println("Error while printing csv file.");
+        }
+    }
+
+    public static void writeQuery3Csv(String file, Map<Integer, Set<Pair<String, String>>> results) {
+
+        SortedSet<Integer> keys = new TreeSet<>(results.keySet()).descendingSet();
+
+        try {
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
+            final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
+                    .withHeader("Grupo", "Aeropuerto A", "Aeropuerto B").withRecordSeparator('\n'));
+            for (Integer key : keys) {
+                Set<Pair<String, String>> pairs = results.get(key);
+
+                for(Pair p : pairs){
+                    try {
+                        csvPrinter.printRecord(key, p.getKey().toString(), p.getValue().toString());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
             csvPrinter.flush();
         } catch (IOException e){
             System.out.println("Error while printing csv file.");
