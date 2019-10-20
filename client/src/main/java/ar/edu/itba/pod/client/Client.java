@@ -133,7 +133,7 @@ public class Client {
                 .submit(new PrivateMovementsPerAirlineCollator(quantityOfResults, airportsMap));
         try {
             List<Map.Entry<String, Double>> result = future.get();
-            CSVhelper.writeQuery2Csv("query5.csv", result);
+            CSVhelper.writeQuery5Csv("query5.csv", result);
         } catch (InterruptedException e) {  // TODO: More explicit error messages.
             e.printStackTrace();
         } catch (ExecutionException e) {

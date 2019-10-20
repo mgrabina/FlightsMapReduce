@@ -133,7 +133,7 @@ public class CSVhelper {
         }
     }
 
-    public static void writeQuery3Csv(String file, List<Map.Entry<String, Double>> results) {
+    public static void writeQuery5Csv(String file, List<Map.Entry<String, Double>> results) {
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
