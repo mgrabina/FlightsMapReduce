@@ -3,10 +3,13 @@ package ar.edu.itba.pod.client;
 import ar.edu.itba.pod.api.Airport;
 import ar.edu.itba.pod.api.Movement;
 import ar.edu.itba.pod.api.collators.CabotageMovementsPerAirlineCollator;
+import ar.edu.itba.pod.api.collators.PrivateMovementsPerAirlineCollator;
 import ar.edu.itba.pod.api.mappers.CabotageMovementsMapper;
 import ar.edu.itba.pod.api.mappers.MovementsByAirportMapper;
+import ar.edu.itba.pod.api.mappers.PrivateMovementsMapper;
 import ar.edu.itba.pod.api.reducers.CabotagePercentageReducer;
 import ar.edu.itba.pod.api.reducers.MovementsByAirportReducer;
+import ar.edu.itba.pod.api.reducers.PrivateFlightsPercentageReducer;
 import ar.edu.itba.pod.client.helpers.CSVhelper;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
@@ -64,13 +67,13 @@ public class Client {
         Job<String, Movement> job = jobTracker.newJob(flightsSource);
 
 //        switch (commandLine.getOptionValue("query")){
-        switch ("2"){
+        switch ("5"){
             case "1": query1(job, airportsMap); break;
             case "2": query2(job, 5); break;
-            case "3": query3(airportsMap, flightsSource, job); break;
-            case "4": query4(airportsMap, flightsSource, job); break;
-            case "5": query5(airportsMap, flightsSource, job); break;
-            case "6": query6(airportsMap, flightsSource, job); break;
+            case "3": query3(airportsMap, flightsSource, job); break; // TOOD
+            case "4": query4(airportsMap, flightsSource, job); break; // TODO
+            case "5": query5(job, 5, airportsMap); break;
+            case "6": query6(airportsMap, flightsSource, job); break; // TODO
             default: logger.error("Invalid Input.");
         }
         System.out.println("Query Finished");
@@ -101,7 +104,7 @@ public class Client {
                 .submit(new CabotageMovementsPerAirlineCollator(quantityOfResults));
         try {
             List<Map.Entry<String, Double>> result = future.get();
-            CSVhelper.writeQuery2Csv("query2.csv", result, quantityOfResults);
+            CSVhelper.writeQuery2Csv("query2.csv", result);
         } catch (InterruptedException e) {  // TODO: More explicit error messages.
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -123,10 +126,21 @@ public class Client {
                                ){
     }
 
-    private static void query5(ReplicatedMap<String, Airport> airportsMap,
-                               KeyValueSource<String, Movement> flights,
-                               Job job
-                               ){
+    private static void query5(Job job, Integer quantityOfResults, ReplicatedMap<String, Airport> airportsMap){
+        ICompletableFuture<List<Map.Entry<String, Double>>> future = job
+                .mapper( new PrivateMovementsMapper() )
+                .reducer( new PrivateFlightsPercentageReducer() )
+                .submit(new PrivateMovementsPerAirlineCollator(quantityOfResults, airportsMap));
+        try {
+            List<Map.Entry<String, Double>> result = future.get();
+            CSVhelper.writeQuery2Csv("query5.csv", result);
+        } catch (InterruptedException e) {  // TODO: More explicit error messages.
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private static void query6(ReplicatedMap<String, Airport> airportsMap,

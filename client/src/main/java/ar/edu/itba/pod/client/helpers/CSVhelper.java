@@ -115,7 +115,7 @@ public class CSVhelper {
         }
     }
 
-    public static void writeQuery2Csv(String file, List<Map.Entry<String, Double>> results, Integer quantity) {
+    public static void writeQuery2Csv(String file, List<Map.Entry<String, Double>> results) {
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
@@ -127,6 +127,24 @@ public class CSVhelper {
                             e.printStackTrace();
                         }
                     });
+            csvPrinter.flush();
+        } catch (IOException e){
+            System.out.println("Error while printing csv file.");
+        }
+    }
+
+    public static void writeQuery3Csv(String file, List<Map.Entry<String, Double>> results) {
+        try {
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
+            final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
+                    .withHeader("OACI", "Porcentaje").withRecordSeparator('\n'));
+            results.forEach(entry -> {
+                try {
+                    csvPrinter.printRecord(entry.getKey(), df2.format(entry.getValue()*100d) + "%");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
             csvPrinter.flush();
         } catch (IOException e){
             System.out.println("Error while printing csv file.");
