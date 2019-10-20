@@ -2,7 +2,10 @@ package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.api.Airport;
 import ar.edu.itba.pod.api.Movement;
+import ar.edu.itba.pod.api.collators.CabotageMovementsPerAirlineCollator;
+import ar.edu.itba.pod.api.mappers.CabotageMovementsMapper;
 import ar.edu.itba.pod.api.mappers.MovementsByAirportMapper;
+import ar.edu.itba.pod.api.reducers.CabotagePercentageReducer;
 import ar.edu.itba.pod.api.reducers.MovementsByAirportReducer;
 import ar.edu.itba.pod.client.helpers.CSVhelper;
 import com.hazelcast.client.HazelcastClient;
@@ -18,8 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import static java.lang.System.exit;
 
 public class Client {
 
@@ -58,15 +64,17 @@ public class Client {
         Job<String, Movement> job = jobTracker.newJob(flightsSource);
 
 //        switch (commandLine.getOptionValue("query")){
-        switch ("1"){
+        switch ("2"){
             case "1": query1(job, airportsMap); break;
-            case "2": query2(airportsMap, flightsSource, job); break;
+            case "2": query2(job, 5); break;
             case "3": query3(airportsMap, flightsSource, job); break;
             case "4": query4(airportsMap, flightsSource, job); break;
             case "5": query5(airportsMap, flightsSource, job); break;
             case "6": query6(airportsMap, flightsSource, job); break;
             default: logger.error("Invalid Input.");
         }
+        System.out.println("Query Finished");
+        exit(0);
     }
 
     private static void query1(Job job, Map<String, Airport> airports){
@@ -86,10 +94,21 @@ public class Client {
         }
     }
 
-    private static void query2(ReplicatedMap<String, Airport> airportsMap,
-                               KeyValueSource<String, Movement> flights,
-                               Job job
-                               ){
+    private static void query2(Job job, Integer quantityOfResults){
+        ICompletableFuture<List<Map.Entry<String, Double>>> future = job
+                .mapper( new CabotageMovementsMapper() )
+                .reducer( new CabotagePercentageReducer() )
+                .submit(new CabotageMovementsPerAirlineCollator(quantityOfResults));
+        try {
+            List<Map.Entry<String, Double>> result = future.get();
+            CSVhelper.writeQuery2Csv("query2.csv", result, quantityOfResults);
+        } catch (InterruptedException e) {  // TODO: More explicit error messages.
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private static void query3(ReplicatedMap<String, Airport> airportsMap,

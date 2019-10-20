@@ -14,9 +14,13 @@ import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 public class CSVhelper {
+    private static DecimalFormat df2 = new DecimalFormat("#.##");
+
+
     public static void loadAirports(ReplicatedMap<String, Airport> map, String file) {
         try {
             CSVParser csvParser = new CSVParser(
@@ -44,7 +48,9 @@ public class CSVhelper {
                     Movement.MovementType.fromString(csvRecord.get(4)),
                     Movement.FlightClass.fromString(csvRecord.get(2)),
                     csvRecord.get(5),
-                    csvRecord.get(6))));
+                    csvRecord.get(6),
+                    csvRecord.get(7)
+            )));
         } catch (IllegalArgumentException ex){
             System.out.println("Invalid value for enum. Exception: " + ex.getMessage());
         } catch (IOException ex) {
@@ -103,6 +109,24 @@ public class CSVhelper {
                             e.printStackTrace();
                         }
             });
+            csvPrinter.flush();
+        } catch (IOException e){
+            System.out.println("Error while printing csv file.");
+        }
+    }
+
+    public static void writeQuery2Csv(String file, List<Map.Entry<String, Double>> results, Integer quantity) {
+        try {
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
+            final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
+                    .withHeader("Aerolínea", "Porcentaje").withRecordSeparator('\n'));
+            results.forEach(entry -> {
+                        try {
+                            csvPrinter.printRecord(entry.getKey(), df2.format(entry.getValue()*100d) + "%");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
             csvPrinter.flush();
         } catch (IOException e){
             System.out.println("Error while printing csv file.");

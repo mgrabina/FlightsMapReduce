@@ -13,7 +13,81 @@ public class Movement implements Serializable {
     private FlightClass flightClass;
     private String srcOaci;
     private String destOaci;
+    private String airline;
 
+    public Movement(Movement.FlightType flightType, Movement.MovementType movementType, Movement.FlightClass flightClass,
+                    String srcOaci, String destOaci, String airline) {
+        this.flightType = flightType;
+        this.movementType = movementType;
+        this.flightClass = flightClass;
+        this.srcOaci = srcOaci;
+        this.destOaci = destOaci;
+        this.airline = airline;
+    }
+
+    public Movement.FlightType getFlightType() {
+        return flightType;
+    }
+
+    public void setFlightType(Movement.FlightType flightType) {
+        this.flightType = flightType;
+    }
+
+    public Movement.MovementType getMovementType() {
+        return movementType;
+    }
+
+    public void setMovementType(Movement.MovementType movementType) {
+        this.movementType = movementType;
+    }
+
+    public Movement.FlightClass getFlightClass() {
+        return flightClass;
+    }
+
+    public void setFlightClass(Movement.FlightClass flightClass) {
+        this.flightClass = flightClass;
+    }
+
+    public String getSrcOaci() {
+        return srcOaci;
+    }
+
+    public void setSrcOaci(String srcOaci) {
+        this.srcOaci = srcOaci;
+    }
+
+    public String getDestOaci() {
+        return destOaci;
+    }
+
+    public void setDestOaci(String destOaci) {
+        this.destOaci = destOaci;
+    }
+
+    public String getAirline() {
+        return airline;
+    }
+
+    public void setAirline(String airline) {
+        this.airline = airline;
+    }
+
+    @java.lang.Override
+    public java.lang.String toString() {
+        return "ar.edu.itba.pod.api.Movement{" +
+                "flightType=" + flightType.toString() +
+                ", movementType=" + movementType.toString() +
+                ", flightClass=" + flightClass.toString() +
+                ", srcOaci='" + srcOaci + '\'' +
+                ", destOaci='" + destOaci + '\'' +
+                ", airline='" + airline + '\'' +
+                '}';
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    ////                          Enums                             ////////
+    ////////////////////////////////////////////////////////////////////////
 
     public static enum FlightType {
         CABOTAGE("Cabotaje"),
@@ -85,64 +159,5 @@ public class Movement implements Serializable {
         FlightClass(String val) {
             this.value = val;
         }
-    }
-
-    public Movement(Movement.FlightType flightType, Movement.MovementType movementType, Movement.FlightClass flightClass, String srcOaci, String destOaci) {
-        this.flightType = flightType;
-        this.movementType = movementType;
-        this.flightClass = flightClass;
-        this.srcOaci = srcOaci;
-        this.destOaci = destOaci;
-    }
-
-    public Movement.FlightType getFlightType() {
-        return flightType;
-    }
-
-    public void setFlightType(Movement.FlightType flightType) {
-        this.flightType = flightType;
-    }
-
-    public Movement.MovementType getMovementType() {
-        return movementType;
-    }
-
-    public void setMovementType(Movement.MovementType movementType) {
-        this.movementType = movementType;
-    }
-
-    public Movement.FlightClass getFlightClass() {
-        return flightClass;
-    }
-
-    public void setFlightClass(Movement.FlightClass flightClass) {
-        this.flightClass = flightClass;
-    }
-
-    public String getSrcOaci() {
-        return srcOaci;
-    }
-
-    public void setSrcOaci(String srcOaci) {
-        this.srcOaci = srcOaci;
-    }
-
-    public String getDestOaci() {
-        return destOaci;
-    }
-
-    public void setDestOaci(String destOaci) {
-        this.destOaci = destOaci;
-    }
-
-    @java.lang.Override
-    public java.lang.String toString() {
-        return "ar.edu.itba.pod.api.Movement{" +
-                "flightType=" + flightType.toString() +
-                ", movementType=" + movementType.toString() +
-                ", flightClass=" + flightClass.toString() +
-                ", srcOaci='" + srcOaci + '\'' +
-                ", destOaci='" + destOaci + '\'' +
-                '}';
     }
 }
