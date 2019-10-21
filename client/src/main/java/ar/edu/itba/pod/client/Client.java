@@ -41,12 +41,15 @@ public class Client {
 
     public static void main(String[] args) {
         CommandLine commandLine = CommandLineHelper.getOptions(args);
-        Integer limit = Integer.valueOf(commandLine.getOptionValue("n"));
+        Integer limit = null;
+        if (Optional.ofNullable(commandLine.getOptionValue("Dn")).isPresent())
+            limit = Integer.valueOf(commandLine.getOptionValue("Dn"));
+        String outPath = commandLine.getOptionValue("DoutPath");
 
         validateParameters(commandLine);
 
         String airportDataFile = "data/aeropuertos.csv";
-        String flightsDataFile = "data/movimientos.csv";
+        String flightsDataFile = commandLine.getOptionValue("DinPath");
 
         // Absolute Path
         airportDataFile = new File(airportDataFile).getAbsolutePath();
@@ -71,13 +74,13 @@ public class Client {
         Job<String, Movement> job = jobTracker.newJob(flightsSource);
 
         // Execute query
-        switch (commandLine.getOptionValue("query")){
-            case "1": query1(job, airportsMap); break;
-            case "2": query2(job, limit); break;
-            case "3": query3(job); break;
-            case "4": query4(job, limit, airportsMap, commandLine.getOptionValue("oaci")); break;
-            case "5": query5(job, limit, airportsMap); break;
-            case "6": query6(job, airportsMap, Integer.valueOf(commandLine.getOptionValue("min"))); break;
+        switch (commandLine.getOptionValue("Dquery")){
+            case "1": query1(job, airportsMap, outPath); break;
+            case "2": query2(job, limit, outPath); break;
+            case "3": query3(job, outPath); break;
+            case "4": query4(job, limit, airportsMap, commandLine.getOptionValue("Doaci"), outPath); break;
+            case "5": query5(job, limit, airportsMap, outPath); break;
+            case "6": query6(job, airportsMap, Integer.valueOf(commandLine.getOptionValue("Dmin")), outPath); break;
             default: logger.error("Invalid Input.");
         }
         System.out.println("Query Finished");
@@ -85,22 +88,22 @@ public class Client {
     }
 
     private static void validateParameters(CommandLine commandLine) {
-        switch (commandLine.getOptionValue("query")){
+        switch (commandLine.getOptionValue("Dquery")){
             case "2":
             case "5":
-                if (!Optional.ofNullable(commandLine.getOptionValue("n")).isPresent()){
+                if (!Optional.ofNullable(commandLine.getOptionValue("Dn")).isPresent()){
                 System.out.println("Paramenter N is required");
                 exit(1);
             }
             break;
-            case "4": if (!Optional.ofNullable(commandLine.getOptionValue("oaci")).isPresent() ||
-                    !Optional.ofNullable(commandLine.getOptionValue("n")).isPresent()){
+            case "4": if (!Optional.ofNullable(commandLine.getOptionValue("Doaci")).isPresent() ||
+                    !Optional.ofNullable(commandLine.getOptionValue("Dn")).isPresent()){
                 System.out.println("Paramenter N and OACI are required");
                 exit(1);
             }
             break;
             case "6":
-                if (!Optional.ofNullable(commandLine.getOptionValue("min")).isPresent()){
+                if (!Optional.ofNullable(commandLine.getOptionValue("Dmin")).isPresent()){
                     System.out.println("Paramenter min is required");
                     exit(1);
                 }
@@ -108,14 +111,14 @@ public class Client {
         }
     }
 
-    private static void query1(Job job, Map<String, Airport> airports){
+    private static void query1(Job job, Map<String, Airport> airports, String outPath){
         ICompletableFuture<Map<String, Integer>> future = job
                 .mapper( new MovementsByAirportMapper() )
                 .reducer( new MovementsByAirportReducer() )
                 .submit();
         try {
             Map<String, Integer> result = future.get();
-            CSVhelper.writeQuery1Csv("query1.csv", result, airports);
+            CSVhelper.writeQuery1Csv(outPath, result, airports);
         } catch (InterruptedException e) {  // TODO: More explicit error messages.
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -126,14 +129,14 @@ public class Client {
     }
 
     //Ojo con el join, no se si no deberia ser distribuido tmb y por eso es un ReplicatedMap
-    private static void query2(Job job, Integer quantityOfResults){
+    private static void query2(Job job, Integer quantityOfResults, String outPath){
         ICompletableFuture<List<Map.Entry<String, Double>>> future = job
                 .mapper( new CabotageMovementsMapper() )
                 .reducer( new CabotagePercentageReducer() )
                 .submit(new CabotageMovementsPerAirlineCollator(quantityOfResults));
         try {
             List<Map.Entry<String, Double>> result = future.get();
-            CSVhelper.writeQuery2Csv("query2.csv", result);
+            CSVhelper.writeQuery2Csv(outPath, result);
         } catch (InterruptedException e) {  // TODO: More explicit error messages.
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -143,7 +146,7 @@ public class Client {
         }
     }
 
-    private static void query3(Job job){
+    private static void query3(Job job, String outPath){
 
         ICompletableFuture<Map<String, Integer>> future = job
                 .mapper(new MovementsByAirportMapper())
@@ -169,7 +172,7 @@ public class Client {
             Map<Integer, Set<Pair<String, String>>> result2 = future2.get();
 
             System.out.println(result2);
-            CSVhelper.writeQuery3Csv("query3.csv", result2);
+            CSVhelper.writeQuery3Csv(outPath, result2);
         } catch (InterruptedException e) {  // TODO: More explicit error messages.
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -182,14 +185,14 @@ public class Client {
     }
 
     private static void query4(Job job, Integer quantityOfResults,
-                               ReplicatedMap<String, Airport> airportsMap, final String srcOaci){
+                               ReplicatedMap<String, Airport> airportsMap, final String srcOaci, String outPath){
         ICompletableFuture<List<Map.Entry<String, Integer>>> future = job
                 .mapper( new DestinyAirportPerSrcAirportMapper(srcOaci))
                 .reducer( new DestinyAiportPerSrcAirportReducer())
                 .submit(new DestinyAirportBySrcAirportCollator(quantityOfResults, airportsMap));
         try {
             List<Map.Entry<String, Integer>> results = future.get();
-            CSVhelper.writeQuery4Csv("query4.csv", results);
+            CSVhelper.writeQuery4Csv(outPath, results);
         } catch (InterruptedException e) {  // TODO: More explicit error messages.
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -199,14 +202,15 @@ public class Client {
         }
     }
 
-    private static void query5(Job job, Integer quantityOfResults, ReplicatedMap<String, Airport> airportsMap){
+    private static void query5(Job job, Integer quantityOfResults, ReplicatedMap<String, Airport> airportsMap,
+                               String outPath){
         ICompletableFuture<List<Map.Entry<String, Double>>> future = job
                 .mapper( new PrivateMovementsMapper() )
                 .reducer( new PrivateFlightsPercentageReducer() )
                 .submit(new PrivateMovementsPerAirlineCollator(quantityOfResults, airportsMap));
         try {
             List<Map.Entry<String, Double>> result = future.get();
-            CSVhelper.writeQuery5Csv("query5.csv", result);
+            CSVhelper.writeQuery5Csv(outPath, result);
         } catch (InterruptedException e) {  // TODO: More explicit error messages.
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -216,7 +220,7 @@ public class Client {
         }
     }
 
-    private static void query6(Job job, ReplicatedMap<String, Airport> airportsMap, Integer min){
+    private static void query6(Job job, ReplicatedMap<String, Airport> airportsMap, Integer min, String outPath){
 
         // TODO Implement
     }
