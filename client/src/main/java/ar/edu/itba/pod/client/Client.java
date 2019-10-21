@@ -11,6 +11,7 @@ import ar.edu.itba.pod.api.mappers.CabotageMovementsMapper;
 import ar.edu.itba.pod.api.mappers.MovementsByAirportMapper;
 import ar.edu.itba.pod.api.reducers.*;
 import ar.edu.itba.pod.client.helpers.CSVhelper;
+import ar.edu.itba.pod.client.helpers.CommandLineHelper;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.core.*;
@@ -18,12 +19,14 @@ import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
 import javafx.util.Pair;
+import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -37,8 +40,10 @@ public class Client {
 
 
     public static void main(String[] args) {
-        // Read Parameters
-//        CommandLine commandLine = CommandLineHelper.getOptions(args);
+        CommandLine commandLine = CommandLineHelper.getOptions(args);
+        Integer limit = Integer.valueOf(commandLine.getOptionValue("n"));
+
+        validateParameters(commandLine);
 
         String airportDataFile = "data/aeropuertos.csv";
         String flightsDataFile = "data/movimientos.csv";
@@ -60,23 +65,47 @@ public class Client {
         CSVhelper.loadAirports(airportsMap, airportDataFile);
         CSVhelper.loadFlights(flightsList, flightsDataFile);
 
+        // Configure job
         final KeyValueSource<String, Movement> flightsSource = KeyValueSource.fromList(flightsList);
-
         JobTracker jobTracker = hInstance.getJobTracker("default");
         Job<String, Movement> job = jobTracker.newJob(flightsSource);
 
-//        switch (commandLine.getOptionValue("query")){
-        switch ("4"){
+        // Execute query
+        switch (commandLine.getOptionValue("query")){
             case "1": query1(job, airportsMap); break;
-            case "2": query2(job, 5); break;
+            case "2": query2(job, limit); break;
             case "3": query3(job); break;
-            case "4": query4(job, 5, airportsMap, "SAEZ"); break;
-            case "5": query5(job, 5, airportsMap); break;
-            case "6": query6(airportsMap, flightsSource, job); break;
+            case "4": query4(job, limit, airportsMap, commandLine.getOptionValue("oaci")); break;
+            case "5": query5(job, limit, airportsMap); break;
+            case "6": query6(job, airportsMap, Integer.valueOf(commandLine.getOptionValue("min"))); break;
             default: logger.error("Invalid Input.");
         }
         System.out.println("Query Finished");
         exit(0);
+    }
+
+    private static void validateParameters(CommandLine commandLine) {
+        switch (commandLine.getOptionValue("query")){
+            case "2":
+            case "5":
+                if (!Optional.ofNullable(commandLine.getOptionValue("n")).isPresent()){
+                System.out.println("Paramenter N is required");
+                exit(1);
+            }
+            break;
+            case "4": if (!Optional.ofNullable(commandLine.getOptionValue("oaci")).isPresent() ||
+                    !Optional.ofNullable(commandLine.getOptionValue("n")).isPresent()){
+                System.out.println("Paramenter N and OACI are required");
+                exit(1);
+            }
+            break;
+            case "6":
+                if (!Optional.ofNullable(commandLine.getOptionValue("min")).isPresent()){
+                    System.out.println("Paramenter min is required");
+                    exit(1);
+                }
+                break;
+        }
     }
 
     private static void query1(Job job, Map<String, Airport> airports){
@@ -187,10 +216,9 @@ public class Client {
         }
     }
 
-    private static void query6(ReplicatedMap<String, Airport> airportsMap,
-                               KeyValueSource<String, Movement> flights,
-                               Job job
-                               ){
+    private static void query6(Job job, ReplicatedMap<String, Airport> airportsMap, Integer min){
+
+        // TODO Implement
     }
 
 }

@@ -24,21 +24,34 @@ public class CommandLineHelper {
 
         Options options = new Options();
 
+        Option query = new Option("Dquery", "Dquery", true, "Query number");
+        query.setRequired(true);
+        options.addOption(query);
+
         Option ip = new Option("DserverAddress", "DserverAddress", true, "IP address of the server");
         ip.setRequired(true);
         options.addOption(ip);
 
-        Option table = new Option("Did", "Did", true, "Table id");
-        table.setRequired(false);
-        options.addOption(table);
+        Option outPath = new Option("DoutPath", "DoutPath", true, "Path for output");
+        outPath.setRequired(true);
+        options.addOption(outPath);
 
-        Option state = new Option("Dstate", "Dstate", true, "State name");
-        state.setRequired(false);
-        options.addOption(state);
 
-        Option path = new Option("DoutPath", "DoutPath", true, "Path to elections results");
-        path.setRequired(true);
-        options.addOption(path);
+        Option inPath = new Option("DinPath", "DinPath", true, "Path for input");
+        inPath.setRequired(true);
+        options.addOption(inPath);
+
+        Option n = new Option("Dn", "Dn", true, "Limit of results");
+        n.setRequired(false);
+        options.addOption(n);
+
+        Option oaci = new Option("Doaci", "Doaci", true, "OACI code of the Airport");
+        oaci.setRequired(false);
+        options.addOption(oaci);
+
+        Option min = new Option("Dmin", "Dmin", true, "Minimum of movements");
+        min.setRequired(false);
+        options.addOption(min);
 
         return CommandLineHelper.generateCommandLineParser(options, args);
     }
