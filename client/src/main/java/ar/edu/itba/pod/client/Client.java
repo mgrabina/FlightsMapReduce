@@ -3,18 +3,13 @@ package ar.edu.itba.pod.client;
 import ar.edu.itba.pod.api.Airport;
 import ar.edu.itba.pod.api.Movement;
 import ar.edu.itba.pod.api.collators.CabotageMovementsPerAirlineCollator;
+import ar.edu.itba.pod.api.collators.DestinyAirportBySrcAirportCollator;
 import ar.edu.itba.pod.api.collators.PrivateMovementsPerAirlineCollator;
-import ar.edu.itba.pod.api.mappers.CabotageMovementsMapper;
-import ar.edu.itba.pod.api.mappers.MovementsByAirportMapper;
-import ar.edu.itba.pod.api.mappers.PrivateMovementsMapper;
+import ar.edu.itba.pod.api.mappers.*;
 import ar.edu.itba.pod.api.collators.GroupByAmountCollator;
 import ar.edu.itba.pod.api.mappers.CabotageMovementsMapper;
 import ar.edu.itba.pod.api.mappers.MovementsByAirportMapper;
-import ar.edu.itba.pod.api.mappers.ReverseMovMapper;
-import ar.edu.itba.pod.api.reducers.CabotagePercentageReducer;
-import ar.edu.itba.pod.api.reducers.GroupByAmountReducer;
-import ar.edu.itba.pod.api.reducers.MovementsByAirportReducer;
-import ar.edu.itba.pod.api.reducers.PrivateFlightsPercentageReducer;
+import ar.edu.itba.pod.api.reducers.*;
 import ar.edu.itba.pod.client.helpers.CSVhelper;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
@@ -71,11 +66,11 @@ public class Client {
         Job<String, Movement> job = jobTracker.newJob(flightsSource);
 
 //        switch (commandLine.getOptionValue("query")){
-        switch ("3"){
+        switch ("4"){
             case "1": query1(job, airportsMap); break;
             case "2": query2(job, 5); break;
             case "3": query3(job); break;
-            case "4": query4(airportsMap, flightsSource, job); break;
+            case "4": query4(job, 5, airportsMap, "SAEZ"); break;
             case "5": query5(job, 5, airportsMap); break;
             case "6": query6(airportsMap, flightsSource, job); break;
             default: logger.error("Invalid Input.");
@@ -157,10 +152,22 @@ public class Client {
 
     }
 
-    private static void query4(ReplicatedMap<String, Airport> airportsMap,
-                               KeyValueSource<String, Movement> flights,
-                               Job job
-                               ){
+    private static void query4(Job job, Integer quantityOfResults,
+                               ReplicatedMap<String, Airport> airportsMap, final String srcOaci){
+        ICompletableFuture<List<Map.Entry<String, Integer>>> future = job
+                .mapper( new DestinyAirportPerSrcAirportMapper(srcOaci))
+                .reducer( new DestinyAiportPerSrcAirportReducer())
+                .submit(new DestinyAirportBySrcAirportCollator(quantityOfResults, airportsMap));
+        try {
+            List<Map.Entry<String, Integer>> results = future.get();
+            CSVhelper.writeQuery4Csv("query4.csv", results);
+        } catch (InterruptedException e) {  // TODO: More explicit error messages.
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private static void query5(Job job, Integer quantityOfResults, ReplicatedMap<String, Airport> airportsMap){

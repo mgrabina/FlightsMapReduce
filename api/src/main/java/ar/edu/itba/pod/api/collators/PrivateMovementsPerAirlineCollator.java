@@ -24,7 +24,12 @@ public class PrivateMovementsPerAirlineCollator implements Collator<Map.Entry<St
                 list.add(entry);
             }
         });
-        list.sort(Map.Entry.comparingByValue());
+        list.sort((o1, o2) -> {
+            if (!o1.getValue().equals(o2.getValue())){
+                return o1.getValue().compareTo(o2.getValue());  //First, comparing by value - asc
+            }
+            return o1.getKey().compareTo(o2.getKey());          //Second, comparing by key alpha order asc
+        });
         return list.subList(0, limit);
     }
 }

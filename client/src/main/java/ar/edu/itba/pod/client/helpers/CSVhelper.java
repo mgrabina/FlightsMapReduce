@@ -149,6 +149,24 @@ public class CSVhelper {
         }
     }
 
+    public static void writeQuery4Csv(String file, List<Map.Entry<String, Integer>> results) {
+        try {
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
+            final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
+                    .withHeader("OACI", "Despegues").withRecordSeparator('\n'));
+            results.forEach(entry -> {
+                try {
+                    csvPrinter.printRecord(entry.getKey(), entry.getValue());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            csvPrinter.flush();
+        } catch (IOException e){
+            System.out.println("Error while printing csv file.");
+        }
+    }
+
     public static void writeQuery3Csv(String file, Map<Integer, Set<Pair<String, String>>> results) {
 
         SortedSet<Integer> keys = new TreeSet<>(results.keySet()).descendingSet();
