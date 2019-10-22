@@ -19,14 +19,14 @@ public class CSVhelper {
     private static DecimalFormat df2 = new DecimalFormat("#.##");
 
 
-    public static void loadAirports(ReplicatedMap<String, Airport> map, String file) {
+    public static void loadAirports(Map<String, Airport> map, String file) {
         try {
             CSVParser csvParser = new CSVParser(
                     Files.newBufferedReader(Paths.get(file)),
                     CSVFormat.newFormat(';').withFirstRecordAsHeader()
             );
             csvParser.forEach(csvRecord -> {
-                Airport a = new Airport(csvRecord.get(1), csvRecord.get(4), csvRecord.get(20));
+                Airport a = new Airport(csvRecord.get(1), csvRecord.get(4), csvRecord.get(21));
                 map.putIfAbsent(a.getOaci(), a);
             });
         } catch (IOException ex) {
@@ -184,6 +184,28 @@ public class CSVhelper {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                }
+            }
+            csvPrinter.flush();
+        } catch (IOException e){
+            System.out.println("Error while printing csv file.");
+        }
+    }
+
+    public static void writeQuery6Csv(String file, List<Map.Entry<String, Integer>> results) {
+
+        try {
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
+            final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
+                    .withHeader("Provincia A", "Provincia B", "Movimientos").withRecordSeparator('\n'));
+            for (Map.Entry<String, Integer> entry: results) {
+
+                String[] provinces = entry.getKey().split("_");
+
+                try {
+                    csvPrinter.printRecord(provinces[0], provinces[1], entry.getValue());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
             csvPrinter.flush();

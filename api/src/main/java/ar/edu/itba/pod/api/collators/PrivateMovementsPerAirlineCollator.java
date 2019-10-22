@@ -9,9 +9,9 @@ import java.util.*;
 public class PrivateMovementsPerAirlineCollator implements Collator<Map.Entry<String, Double>, List<Map.Entry<String, Double>>> {
 
     private int limit;
-    ReplicatedMap<String, Airport> airportsMap;
+    Map<String, Airport> airportsMap;
 
-    public PrivateMovementsPerAirlineCollator(int limit, ReplicatedMap<String, Airport> airportsMap) {
+    public PrivateMovementsPerAirlineCollator(int limit, Map<String, Airport> airportsMap) {
         this.limit = limit;
         this.airportsMap = airportsMap;
     }
