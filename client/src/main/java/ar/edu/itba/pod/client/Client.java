@@ -9,6 +9,7 @@ import ar.edu.itba.pod.api.mappers.MovementsByAirportMapper;
 import ar.edu.itba.pod.api.reducers.*;
 import ar.edu.itba.pod.client.helpers.CSVhelper;
 import ar.edu.itba.pod.client.helpers.CommandLineHelper;
+import ar.edu.itba.pod.client.helpers.Timestamp;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.core.*;
@@ -21,22 +22,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.FileHandler;
+import java.util.logging.SimpleFormatter;
 
 import static java.lang.System.exit;
 
 public class Client {
 
-    private static Logger logger = LoggerFactory.getLogger(Client.class);
     private static ClientConfig hazelcastCfg;
     private static HazelcastInstance hInstance;
-
+    private static Timestamp timestamp;
 
     public static void main(String[] args) {
+
         CommandLine commandLine = CommandLineHelper.getOptions(args);
         Integer limit = null;
         if (Optional.ofNullable(commandLine.getOptionValue("Dn")).isPresent())
@@ -44,6 +48,8 @@ public class Client {
         String outPath = commandLine.getOptionValue("DoutPath");
 
         validateParameters(commandLine);
+
+        timestamp = new Timestamp();
 
         String airportDataFile = "data/aeropuertos.csv";
         String flightsDataFile = commandLine.getOptionValue("DinPath");
@@ -62,8 +68,12 @@ public class Client {
         flightsList.clear();
 
         // Loads data from files
+        timestamp.write("Inicio de la lectura del archivo");
+
         CSVhelper.loadAirports(airportsMap, airportDataFile);
         CSVhelper.loadFlights(flightsList, flightsDataFile);
+
+        timestamp.write("Fin de la lectura del archivo");
 
         // Configure job
         final KeyValueSource<String, Movement> flightsSource = KeyValueSource.fromList(flightsList);
@@ -71,46 +81,51 @@ public class Client {
         Job<String, Movement> job = jobTracker.newJob(flightsSource);
 
         // Execute query
-        //switch (commandLine.getOptionValue("Dquery")){
-        switch ("6"){
+
+        timestamp.write("Inicio del trabajo map/reduce");
+
+        switch (commandLine.getOptionValue("Dquery")){
             case "1": query1(job, airportsMap, outPath); break;
             case "2": query2(job, limit, outPath); break;
             case "3": query3(job, outPath); break;
             case "4": query4(job, limit, airportsMap, commandLine.getOptionValue("Doaci"), outPath); break;
             case "5": query5(job, limit, airportsMap, outPath); break;
-            case "6": query6(job, airportsMap, 1, outPath); break;
-            //Integer.valueOf(commandLine.getOptionValue("Dmin"))
-            default: logger.error("Invalid Input.");
+            case "6": query6(job, airportsMap, Integer.valueOf(commandLine.getOptionValue("Dmin")), outPath); break;
+            default: System.out.println("Error");
         }
-        System.out.println("Query Finished");
+
+        timestamp.write("Fin del trabajo map/reduce");
+        timestamp.close();
+
         exit(0);
     }
 
     private static void validateParameters(CommandLine commandLine) {
-//        switch (commandLine.getOptionValue("Dquery")){
-//            case "2":
-//            case "5":
-//                if (!Optional.ofNullable(commandLine.getOptionValue("Dn")).isPresent()){
-//                System.out.println("Paramenter N is required");
-//                exit(1);
-//            }
-//            break;
-//            case "4": if (!Optional.ofNullable(commandLine.getOptionValue("Doaci")).isPresent() ||
-//                    !Optional.ofNullable(commandLine.getOptionValue("Dn")).isPresent()){
-//                System.out.println("Paramenter N and OACI are required");
-//                exit(1);
-//            }
-//            break;
-//            case "6":
-//                if (!Optional.ofNullable(commandLine.getOptionValue("Dmin")).isPresent()){
-//                    System.out.println("Paramenter min is required");
-//                    exit(1);
-//                }
-//                break;
-//        }
+        switch (commandLine.getOptionValue("Dquery")){
+            case "2":
+            case "5":
+                if (!Optional.ofNullable(commandLine.getOptionValue("Dn")).isPresent()){
+                System.out.println("Paramenter N is required");
+                exit(1);
+            }
+            break;
+            case "4": if (!Optional.ofNullable(commandLine.getOptionValue("Doaci")).isPresent() ||
+                    !Optional.ofNullable(commandLine.getOptionValue("Dn")).isPresent()){
+                System.out.println("Paramenter N and OACI are required");
+                exit(1);
+            }
+            break;
+            case "6":
+                if (!Optional.ofNullable(commandLine.getOptionValue("Dmin")).isPresent()){
+                    System.out.println("Paramenter min is required");
+                    exit(1);
+                }
+                break;
+        }
     }
 
     private static void query1(Job job, Map<String, Airport> airports, String outPath){
+
         ICompletableFuture<Map<String, Integer>> future = job
                 .mapper( new MovementsByAirportMapper() )
                 .reducer( new MovementsByAirportReducer() )
@@ -127,8 +142,8 @@ public class Client {
         }
     }
 
-    //Ojo con el join, no se si no deberia ser distribuido tmb y por eso es un ReplicatedMap
     private static void query2(Job job, Integer quantityOfResults, String outPath){
+
         ICompletableFuture<List<Map.Entry<String, Double>>> future = job
                 .mapper( new CabotageMovementsMapper() )
                 .reducer( new CabotagePercentageReducer() )
@@ -180,11 +195,11 @@ public class Client {
             e.printStackTrace();
         }
 
-
     }
 
     private static void query4(Job job, Integer quantityOfResults,
                                Map<String, Airport> airportsMap, final String srcOaci, String outPath){
+
         ICompletableFuture<List<Map.Entry<String, Integer>>> future = job
                 .mapper( new DestinyAirportPerSrcAirportMapper(srcOaci))
                 .reducer( new DestinyAiportPerSrcAirportReducer())
@@ -203,6 +218,7 @@ public class Client {
 
     private static void query5(Job job, Integer quantityOfResults, Map<String, Airport> airportsMap,
                                String outPath){
+
         ICompletableFuture<List<Map.Entry<String, Double>>> future = job
                 .mapper( new PrivateMovementsMapper() )
                 .reducer( new PrivateFlightsPercentageReducer() )
