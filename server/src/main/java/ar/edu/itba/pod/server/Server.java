@@ -7,7 +7,7 @@ import java.net.Inet4Address;
 public class Server {
     public static void main(String[] args) {
         Config cfg = new Config();
-        cfg.getGroupConfig().setName("lity").setPassword("lito123");
+        cfg.getGroupConfig().setName("g9").setPassword("g9");
 
         try {
             cfg.getNetworkConfig().getJoin().getTcpIpConfig().addMember(Inet4Address.getLocalHost().getHostAddress());

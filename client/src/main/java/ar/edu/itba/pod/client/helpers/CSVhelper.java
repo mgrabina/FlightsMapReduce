@@ -56,35 +56,9 @@ public class CSVhelper {
         }
     }
 
-    public static void writeCsv(String file, Map<String, Double> results) {
-        try {
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
-            final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
-                    .withHeader("Porcentaje", "Partido").withRecordSeparator('\n'));
-
-            results.entrySet().stream().sorted((o1, o2) -> {
-                if(!o1.getValue().equals(o2.getValue()))
-                    return Double.compare(o2.getValue(),o1.getValue());
-                return o1.getKey().compareTo(o2.getKey());
-            }).forEach(entry -> {
-                String party = entry.getKey();
-                DecimalFormat format = new DecimalFormat("##.00");
-                String percent = format.format(entry.getValue() * 100) + "%";
-                try {
-                    csvPrinter.printRecord(percent, party);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            csvPrinter.flush();
-        } catch (IOException e){
-            System.out.println("Error while printing csv file.");
-        }
-    }
-
     public static void writeQuery1Csv(String file, Map<String, Integer> results, Map<String, Airport> airports) {
         try {
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file + "/query1.csv"));
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
                     .withHeader("OACI", "Denominación", "Movimientos").withRecordSeparator('\n'));
             results.entrySet().stream()
@@ -115,7 +89,7 @@ public class CSVhelper {
 
     public static void writeQuery2Csv(String file, List<Map.Entry<String, Double>> results) {
         try {
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file + "/query2.csv"));
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
                     .withHeader("Aerolínea", "Porcentaje").withRecordSeparator('\n'));
             results.forEach(entry -> {
@@ -133,7 +107,7 @@ public class CSVhelper {
 
     public static void writeQuery5Csv(String file, List<Map.Entry<String, Double>> results) {
         try {
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file + "/query5.csv"));
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
                     .withHeader("OACI", "Porcentaje").withRecordSeparator('\n'));
             results.forEach(entry -> {
@@ -151,7 +125,7 @@ public class CSVhelper {
 
     public static void writeQuery4Csv(String file, List<Map.Entry<String, Integer>> results) {
         try {
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file + "/query4.csv"));
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
                     .withHeader("OACI", "Despegues").withRecordSeparator('\n'));
             results.forEach(entry -> {
@@ -172,7 +146,7 @@ public class CSVhelper {
         SortedSet<Integer> keys = new TreeSet<>(results.keySet()).descendingSet();
 
         try {
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file + "/query3.csv"));
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
                     .withHeader("Grupo", "Aeropuerto A", "Aeropuerto B").withRecordSeparator('\n'));
             for (Integer key : keys) {
@@ -195,7 +169,7 @@ public class CSVhelper {
     public static void writeQuery6Csv(String file, List<Map.Entry<String, Integer>> results) {
 
         try {
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file));
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(file + "/query6.csv"));
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
                     .withHeader("Provincia A", "Provincia B", "Movimientos").withRecordSeparator('\n'));
             for (Map.Entry<String, Integer> entry: results) {

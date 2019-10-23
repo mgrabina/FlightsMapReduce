@@ -1,0 +1,4 @@
+25/10/2019 05:51:24.0256 - Inicio de la lectura del archivo
+25/10/2019 05:51:40.0555 - Fin de la lectura del archivo
+25/10/2019 05:51:40.0561 - Inicio del trabajo map/reduce
+25/10/2019 05:51:41.0744 - Fin del trabajo map/reduce. Duración: 1189 milisegundos.
