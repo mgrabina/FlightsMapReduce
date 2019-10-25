@@ -98,6 +98,7 @@ public class Client {
 
         millis = System.currentTimeMillis() - millis;
         timestamp.write("Fin del trabajo map/reduce. Duración: " + millis + " milisegundos.");
+
         timestamp.close();
 
         exit(0);
