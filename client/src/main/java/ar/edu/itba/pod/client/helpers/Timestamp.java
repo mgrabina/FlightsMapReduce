@@ -9,6 +9,8 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static java.lang.System.exit;
+
 public class Timestamp {
 
     private Logger logger;
@@ -20,6 +22,7 @@ public class Timestamp {
             this.printer = new PrintWriter(path + "/query" + query + ".txt", "UTF-8");
         } catch (IOException e){
             System.out.println("Could not create printer.");
+            exit(-1);
         }
 
         this.logger =  LoggerFactory.getLogger(Client.class);

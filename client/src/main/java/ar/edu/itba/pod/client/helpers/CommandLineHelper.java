@@ -28,17 +28,17 @@ public class CommandLineHelper {
         query.setRequired(true);
         options.addOption(query);
 
-        Option ip = new Option("DserverAddress", "DserverAddress", true, "IP address of the server");
-        ip.setRequired(true);
+        Option ip = new Option("Daddresses", "Daddresses", true, "IP addresses of the nodes");
+        ip.setRequired(false);
         options.addOption(ip);
 
         Option outPath = new Option("DoutPath", "DoutPath", true, "Path for output");
-        outPath.setRequired(true);
+        outPath.setRequired(false);
         options.addOption(outPath);
 
 
         Option inPath = new Option("DinPath", "DinPath", true, "Path for input");
-        inPath.setRequired(true);
+        inPath.setRequired(false);
         options.addOption(inPath);
 
         Option n = new Option("Dn", "Dn", true, "Limit of results");

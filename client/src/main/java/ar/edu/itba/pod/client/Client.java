@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,13 +46,13 @@ public class Client {
         Integer limit = null;
         if (Optional.ofNullable(commandLine.getOptionValue("Dn")).isPresent())
             limit = Integer.valueOf(commandLine.getOptionValue("Dn"));
-        String outPath = commandLine.getOptionValue("DoutPath");
+        String outPath = Optional.ofNullable(commandLine.getOptionValue("DoutPath")).orElse(Paths.get("../../../out").normalize().toAbsolutePath().toString());
         Integer queryNumber = Integer.valueOf(commandLine.getOptionValue("Dquery"));
 
         validateParameters(commandLine);
 
         timestamp = new Timestamp(outPath, queryNumber);
-        String inPath = commandLine.getOptionValue("DinPath");
+        String inPath = Optional.ofNullable(commandLine.getOptionValue("DinPath")).orElse(Paths.get("../../../data").normalize().toAbsolutePath().toString());
         String airportDataFile = inPath + "/aeropuertos.csv";
         String flightsDataFile = inPath + "/movimientos.csv";
 
@@ -59,9 +60,15 @@ public class Client {
         airportDataFile = new File(airportDataFile).getAbsolutePath();
         flightsDataFile = new File(flightsDataFile).getAbsolutePath();
 
+        String addresses = Optional.ofNullable(commandLine.getOptionValue("Daddresses")).orElse("127.0.0.1");
+
+        timestamp.write("Iniciando configuración...");
+
         // Load Configurations and data files
         hazelcastCfg = new ClientConfig();
+        hazelcastCfg.setProperty("hazelcast.logging.type", "none");
         hazelcastCfg.getGroupConfig().setName("g9").setPassword("g9");
+        hazelcastCfg.addAddress(addresses);
         hInstance = HazelcastClient.newHazelcastClient(hazelcastCfg);
         final Map<String, Airport> airportsMap = hInstance.getReplicatedMap("airport-list");
         final IList<Movement> flightsList = hInstance.getList("flights-list");
@@ -189,7 +196,6 @@ public class Client {
 
             Map<Integer, Set<Pair<String, String>>> result2 = future2.get();
 
-            System.out.println(result2);
             CSVhelper.writeQuery3Csv(outPath, result2);
         } catch (InterruptedException e) {  // TODO: More explicit error messages.
             e.printStackTrace();

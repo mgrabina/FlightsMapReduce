@@ -1,8 +1,6 @@
 package ar.edu.itba.pod.api.collators;
 
 import com.hazelcast.mapreduce.Collator;
-import com.sun.org.apache.xerces.internal.xs.StringList;
-import com.sun.org.apache.xerces.internal.xs.datatypes.ObjectList;
 import javafx.util.Pair;
 
 import java.util.*;
