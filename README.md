@@ -1,37 +1,23 @@
-# Remote-Voting-System
+# Flights Map-Reduce
 
-Run each section on a different terminal.
-
-## Start Registry
-
-cd into project root
-chmod u+x ./setup_registry.sh
-sh ./setup_registry.sh
-
-
-## Start server
-
-chmod u+x ./server.sh
-sh ./server.sh
-
+## Start node
+sh ./node
 
 ## Start clients
-### Vote client
-chmod u+x ./voteClient.sh
-Mandatory Parameters:
--DserverAddress,--DserverAddress <arg>   IP address of the server
--DvotesPath,--DvotesPath <arg>           Absolute Votes file path
-sh ./voteClient.sh 
+### Query 1
+sh ./query1 -Daddresses=[ADRESSES] -DinPath=[ABSOLUTE PATH] -DoutPath=[ABSOLUTE PATH] 
 
-### Fiscal client
-chmod u+x ./fiscalClient.sh
-sh ./fiscalClient.sh 
+### Query 2
+sh ./query2 -Dn=[LIMIT] -Daddresses=[ADRESSES] -DinPath=[ABSOLUTE PATH] -DoutPath=[ABSOLUTE PATH] 
 
-### Management client
-chmod u+x ./managementClient.sh
-sh ./managementClient.sh 
+### Query 3
+sh ./query3 -Daddresses=[ADRESSES] -DinPath=[ABSOLUTE PATH] -DoutPath=[ABSOLUTE PATH] 
 
-### Query client
-chmod u+x ./queryClient.sh
-sh ./votequeryClientClient.sh 
+### Query 4
+sh ./query4 -Dn=[LIMIT] -Doaci=[OACI] -Daddresses=[ADRESSES] -DinPath=[ABSOLUTE PATH] -DoutPath=[ABSOLUTE PATH] 
 
+### Query 5
+sh ./query5 -Dn=[LIMIT] -Daddresses=[ADRESSES] -DinPath=[ABSOLUTE PATH] -DoutPath=[ABSOLUTE PATH] 
+
+### Query 6
+sh ./query6 -Dmin=[MINIMUM] -Daddresses=[ADRESSES] -DinPath=[ABSOLUTE PATH] -DoutPath=[ABSOLUTE PATH] 

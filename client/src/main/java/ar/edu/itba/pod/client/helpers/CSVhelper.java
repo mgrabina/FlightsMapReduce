@@ -15,6 +15,8 @@ import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.*;
 
+import static java.lang.System.exit;
+
 public class CSVhelper {
     private static DecimalFormat df2 = new DecimalFormat("#.##");
 
@@ -78,12 +80,13 @@ public class CSVhelper {
                             String quantity = entry.getValue().toString();
                             csvPrinter.printRecord(airport.getOaci(), airport.getDenomination(), quantity);
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            System.out.println("Hubo un error imprimiendo la línea.");
                         }
             });
             csvPrinter.flush();
         } catch (IOException e){
             System.out.println("Error while printing csv file.");
+            exit(1);
         }
     }
 
@@ -96,7 +99,7 @@ public class CSVhelper {
                         try {
                             csvPrinter.printRecord(entry.getKey(), df2.format(entry.getValue()*100d) + "%");
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            System.out.println("Hubo un error imprimiendo la línea.");
                         }
                     });
             csvPrinter.flush();
@@ -114,12 +117,13 @@ public class CSVhelper {
                 try {
                     csvPrinter.printRecord(entry.getKey(), df2.format(entry.getValue()*100d) + "%");
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println("Hubo un error imprimiendo la línea.");
                 }
             });
             csvPrinter.flush();
         } catch (IOException e){
             System.out.println("Error while printing csv file.");
+            exit(1);
         }
     }
 
@@ -132,12 +136,13 @@ public class CSVhelper {
                 try {
                     csvPrinter.printRecord(entry.getKey(), entry.getValue());
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println("Hubo un error imprimiendo la línea.");
                 }
             });
             csvPrinter.flush();
         } catch (IOException e){
             System.out.println("Error while printing csv file.");
+            exit(1);
         }
     }
 
@@ -156,13 +161,14 @@ public class CSVhelper {
                     try {
                         csvPrinter.printRecord(key, p.getKey().toString(), p.getValue().toString());
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        System.out.println("Hubo un error imprimiendo la línea.");
                     }
                 }
             }
             csvPrinter.flush();
         } catch (IOException e){
             System.out.println("Error while printing csv file.");
+            exit(1);
         }
     }
 
@@ -179,12 +185,13 @@ public class CSVhelper {
                 try {
                     csvPrinter.printRecord(provinces[0], provinces[1], entry.getValue());
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println("Hubo un error imprimiendo la línea.");
                 }
             }
             csvPrinter.flush();
         } catch (IOException e){
             System.out.println("Error while printing csv file.");
+            exit(1);
         }
     }
 }

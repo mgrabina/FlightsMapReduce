@@ -144,13 +144,11 @@ public class Client {
         try {
             Map<String, Integer> result = future.get();
             CSVhelper.writeQuery1Csv(outPath, result, airports);
-        } catch (InterruptedException e) {  // TODO: More explicit error messages.
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println("No pudimos procesar la información.");
+            exit(1);
         }
+
     }
 
     private static void query2(Job job, Integer quantityOfResults, String outPath){
@@ -162,12 +160,9 @@ public class Client {
         try {
             List<Map.Entry<String, Double>> result = future.get();
             CSVhelper.writeQuery2Csv(outPath, result);
-        } catch (InterruptedException e) {  // TODO: More explicit error messages.
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
         } catch (Exception e){
-            e.printStackTrace();
+            System.out.println("No pudimos procesar la información.");
+            exit(1);
         }
     }
 
@@ -197,12 +192,9 @@ public class Client {
             Map<Integer, Set<Pair<String, String>>> result2 = future2.get();
 
             CSVhelper.writeQuery3Csv(outPath, result2);
-        } catch (InterruptedException e) {  // TODO: More explicit error messages.
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
         } catch (Exception e){
-            e.printStackTrace();
+            System.out.println("No pudimos procesar la información.");
+            exit(1);
         }
 
     }
@@ -217,12 +209,9 @@ public class Client {
         try {
             List<Map.Entry<String, Integer>> results = future.get();
             CSVhelper.writeQuery4Csv(outPath, results);
-        } catch (InterruptedException e) {  // TODO: More explicit error messages.
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
         } catch (Exception e){
-            e.printStackTrace();
+            System.out.println("No pudimos procesar la información.");
+            exit(1);
         }
     }
 
@@ -236,12 +225,9 @@ public class Client {
         try {
             List<Map.Entry<String, Double>> result = future.get();
             CSVhelper.writeQuery5Csv(outPath, result);
-        } catch (InterruptedException e) {  // TODO: More explicit error messages.
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
         } catch (Exception e){
-            e.printStackTrace();
+            System.out.println("No pudimos procesar la información.");
+            exit(1);
         }
     }
 
@@ -274,12 +260,9 @@ public class Client {
             List<Map.Entry<String,Integer>> result2 = future2.get();
 
             CSVhelper.writeQuery6Csv(outPath, result2);
-        } catch (InterruptedException e) {  // TODO: More explicit error messages.
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
         } catch (Exception e){
-            e.printStackTrace();
+            System.out.println("No pudimos procesar la información.");
+            exit(1);
         }
     }
 
