@@ -16,21 +16,13 @@ import com.hazelcast.core.*;
 import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
-import javafx.util.Pair;
 import org.apache.commons.cli.CommandLine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.FileHandler;
-import java.util.logging.SimpleFormatter;
 
 import static java.lang.System.exit;
 
@@ -184,12 +176,12 @@ public class Client {
             JobTracker jobTracker = hInstance.getJobTracker("default");
             Job<String, Integer> job2 = jobTracker.newJob(partialSource);
 
-            ICompletableFuture<Map<Integer, Set<Pair<String, String>>>> future2 = job2
+            ICompletableFuture<Map<Integer, Set<Map.Entry<String, String>>>> future2 = job2
                     .mapper(new ReverseMovMapper())
                     .reducer(new GroupByAmountReducer())
                     .submit(new GroupByAmountCollator());
 
-            Map<Integer, Set<Pair<String, String>>> result2 = future2.get();
+            Map<Integer, Set<Map.Entry<String, String>>> result2 = future2.get();
 
             CSVhelper.writeQuery3Csv(outPath, result2);
         } catch (Exception e){
