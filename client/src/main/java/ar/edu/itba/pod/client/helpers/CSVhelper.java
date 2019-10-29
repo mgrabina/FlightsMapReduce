@@ -8,6 +8,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
@@ -89,6 +90,7 @@ public class CSVhelper {
     }
 
     public static void writeQuery2Csv(String file, List<Map.Entry<String, Double>> results) {
+        df2.setRoundingMode(RoundingMode.DOWN);
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(file + "/query2.csv"));
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
