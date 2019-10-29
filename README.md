@@ -1,5 +1,8 @@
 # Flights Map-Reduce
 
+## Build Project 
+mvn clean install
+
 ## Start node
 sh ./node
 

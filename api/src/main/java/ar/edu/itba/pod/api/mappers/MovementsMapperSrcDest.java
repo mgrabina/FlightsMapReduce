@@ -3,7 +3,6 @@ package ar.edu.itba.pod.api.mappers;
 import ar.edu.itba.pod.api.Movement;
 import com.hazelcast.mapreduce.Context;
 import com.hazelcast.mapreduce.Mapper;
-import javafx.util.Pair;
 
 public class MovementsMapperSrcDest implements Mapper<String, Movement, String, Integer> {
     private static final long serialVersionUID = -4478648180677155273L;

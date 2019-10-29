@@ -3,8 +3,6 @@ package ar.edu.itba.pod.client.helpers;
 import ar.edu.itba.pod.api.Airport;
 import ar.edu.itba.pod.api.Movement;
 import com.hazelcast.core.IList;
-import com.hazelcast.core.ReplicatedMap;
-import javafx.util.Pair;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -146,7 +144,7 @@ public class CSVhelper {
         }
     }
 
-    public static void writeQuery3Csv(String file, Map<Integer, Set<Pair<String, String>>> results) {
+    public static void writeQuery3Csv(String file, Map<Integer, Set<Map.Entry<String, String>>> results) {
 
         SortedSet<Integer> keys = new TreeSet<>(results.keySet()).descendingSet();
 
@@ -155,9 +153,9 @@ public class CSVhelper {
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
                     .withHeader("Grupo", "Aeropuerto A", "Aeropuerto B").withRecordSeparator('\n'));
             for (Integer key : keys) {
-                Set<Pair<String, String>> pairs = results.get(key);
+                Set<Map.Entry<String, String>> pairs = results.get(key);
 
-                for(Pair p : pairs){
+                for(Map.Entry p : pairs){
                     try {
                         csvPrinter.printRecord(key, p.getKey().toString(), p.getValue().toString());
                     } catch (IOException e) {
