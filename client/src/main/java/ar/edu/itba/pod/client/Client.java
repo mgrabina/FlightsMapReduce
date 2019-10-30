@@ -19,10 +19,7 @@ import com.hazelcast.mapreduce.KeyValueSource;
 import org.apache.commons.cli.CommandLine;
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static java.lang.System.exit;
 
@@ -60,7 +57,9 @@ public class Client {
         hazelcastCfg = new ClientConfig();
         hazelcastCfg.setProperty("hazelcast.logging.type", "none");
         hazelcastCfg.getGroupConfig().setName("g9").setPassword("g9");
-        hazelcastCfg.addAddress(addresses);
+        String[] addressesArray = addresses.split(";");
+        System.out.println(Arrays.toString(addressesArray));
+        hazelcastCfg.addAddress(addressesArray);
         hInstance = HazelcastClient.newHazelcastClient(hazelcastCfg);
         final Map<String, Airport> airportsMap = hInstance.getReplicatedMap("airport-list");
         final IList<Movement> flightsList = hInstance.getList("flights-list");
