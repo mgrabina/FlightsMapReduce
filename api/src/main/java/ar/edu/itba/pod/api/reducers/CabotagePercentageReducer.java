@@ -5,7 +5,7 @@ import com.hazelcast.mapreduce.ReducerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CabotagePercentageReducer implements ReducerFactory<String, Boolean, Double> {
+public class CabotagePercentageReducer implements ReducerFactory<String, Integer, Double> {
     private static final long serialVersionUID = -4213292631235182815L;
 
     private AtomicInteger total;
@@ -15,8 +15,8 @@ public class CabotagePercentageReducer implements ReducerFactory<String, Boolean
     }
 
     @Override
-    public Reducer<Boolean, Double> newReducer(final String airline) {
-        return new Reducer<Boolean, Double>() {
+    public Reducer<Integer, Double> newReducer(final String airline) {
+        return new Reducer<Integer, Double>() {
             private AtomicInteger cabotage;
 
             @Override
@@ -25,11 +25,9 @@ public class CabotagePercentageReducer implements ReducerFactory<String, Boolean
             }
 
             @Override
-            public void reduce(Boolean isCabotage) {
-                if (isCabotage){
-                    cabotage.incrementAndGet();
-                    total.incrementAndGet();
-                }
+            public void reduce(Integer cabotages) {
+                cabotage.set(cabotage.get() + cabotages);
+                total.set(total.get() + cabotages);
             }
 
             @Override

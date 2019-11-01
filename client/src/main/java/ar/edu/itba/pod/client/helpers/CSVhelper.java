@@ -3,6 +3,7 @@ package ar.edu.itba.pod.client.helpers;
 import ar.edu.itba.pod.api.Airport;
 import ar.edu.itba.pod.api.Movement;
 import com.hazelcast.core.IList;
+import com.hazelcast.core.IMap;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -35,20 +36,22 @@ public class CSVhelper {
         }
     }
 
-    public static void loadFlights(IList<Movement> list, String file) {
+    public static void loadFlights(IMap<String, Movement> map, String file) {
         try {
 
             CSVParser csvParser = new CSVParser(
                     Files.newBufferedReader(Paths.get(file)),
                     CSVFormat.newFormat(';').withFirstRecordAsHeader()
             );
-            csvParser.forEach(csvRecord -> list.add(new Movement(
-                    Movement.FlightType.fromString(csvRecord.get(3)),
-                    Movement.MovementType.fromString(csvRecord.get(4)),
-                    Movement.FlightClass.fromString(csvRecord.get(2)),
-                    csvRecord.get(5),
-                    csvRecord.get(6),
-                    csvRecord.get(7)
+            csvParser.forEach(csvRecord -> map.put(
+                    String.valueOf(csvRecord.getRecordNumber()),
+                    new Movement(
+                        Movement.FlightType.fromString(csvRecord.get(3)),
+                        Movement.MovementType.fromString(csvRecord.get(4)),
+                        Movement.FlightClass.fromString(csvRecord.get(2)),
+                        csvRecord.get(5),
+                        csvRecord.get(6),
+                        csvRecord.get(7)
             )));
         } catch (IllegalArgumentException ex){
             System.out.println("Invalid value for enum. Exception: " + ex.getMessage());

@@ -3,8 +3,7 @@ package ar.edu.itba.pod.client;
 import ar.edu.itba.pod.api.Airport;
 import ar.edu.itba.pod.api.Movement;
 import ar.edu.itba.pod.api.collators.*;
-import ar.edu.itba.pod.api.combiners.CabotageMovementsCombinerFactory;
-import ar.edu.itba.pod.api.keypredicates.CabotageKeyPredicate;
+import ar.edu.itba.pod.api.combiners.StringIntegerCombinerFactory;
 import ar.edu.itba.pod.api.mappers.*;
 import ar.edu.itba.pod.api.mappers.CabotageMovementsMapper;
 import ar.edu.itba.pod.api.mappers.MovementsByAirportMapper;
@@ -14,6 +13,7 @@ import ar.edu.itba.pod.client.helpers.CommandLineHelper;
 import ar.edu.itba.pod.client.helpers.Timestamp;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
+import com.hazelcast.client.config.ClientNetworkConfig;
 import com.hazelcast.core.*;
 import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
@@ -59,25 +59,28 @@ public class Client {
         hazelcastCfg = new ClientConfig();
         hazelcastCfg.setProperty("hazelcast.logging.type", "none");
         hazelcastCfg.getGroupConfig().setName("g9").setPassword("g9");
+
         String[] addressesArray = addresses.split(";");
-        System.out.println(Arrays.toString(addressesArray));
-        hazelcastCfg.addAddress(addressesArray);
+        ClientNetworkConfig net = new ClientNetworkConfig();
+        Arrays.stream(addressesArray).forEach(net::addAddress);
+        hazelcastCfg.setNetworkConfig(net);
+
         hInstance = HazelcastClient.newHazelcastClient(hazelcastCfg);
         final Map<String, Airport> airportsMap = hInstance.getReplicatedMap("airport-list");
-        final IList<Movement> flightsList = hInstance.getList("flights-list");
+        final IMap<String, Movement> flightsMap = hInstance.getMap("flights-map");
         airportsMap.clear();
-        flightsList.clear();
+        flightsMap.clear();
 
         // Loads data from files
         timestamp.write("Inicio de la lectura del archivo");
 
         CSVhelper.loadAirports(airportsMap, airportDataFile);
-        CSVhelper.loadFlights(flightsList, flightsDataFile);
+        CSVhelper.loadFlights(flightsMap, flightsDataFile);
 
         timestamp.write("Fin de la lectura del archivo");
 
         // Configure job
-        final KeyValueSource<String, Movement> flightsSource = KeyValueSource.fromList(flightsList);
+        final KeyValueSource<String, Movement> flightsSource = KeyValueSource.fromMap(flightsMap);
         JobTracker jobTracker = hInstance.getJobTracker("default");
         Job<String, Movement> job = jobTracker.newJob(flightsSource);
 
@@ -131,6 +134,7 @@ public class Client {
 
         ICompletableFuture<Map<String, Integer>> future = job
                 .mapper( new MovementsByAirportMapper() )
+                .combiner(new StringIntegerCombinerFactory())
                 .reducer( new MovementsByAirportReducer() )
                 .submit();
         try {
@@ -149,10 +153,8 @@ public class Client {
         Long millis = System.currentTimeMillis();
 
         ICompletableFuture<List<Map.Entry<String, Double>>> future = job
-//                .keyPredicate(new CabotageKeyPredicate())
                 .mapper( new CabotageMovementsMapper() )
-//                .combiner(new CabotageMovementsCombinerFactory())
-
+                .combiner(new StringIntegerCombinerFactory())
                 .reducer( new CabotagePercentageReducer() )
                 .submit(new CabotageMovementsPerAirlineCollator(quantityOfResults));
         try {
@@ -161,7 +163,7 @@ public class Client {
             timestamp.write("Fin del trabajo map/reduce. Duración: " + millis + " milisegundos.");
             CSVhelper.writeQuery2Csv(outPath, result);
         } catch (Exception e){
-            System.out.println("No pudimos procesar la información.");
+            System.out.println("No pudimos procesar la información." + e.getMessage());
             exit(1);
         }
     }
@@ -171,6 +173,7 @@ public class Client {
 
         ICompletableFuture<Map<String, Integer>> future = job
                 .mapper(new MovementsByAirportMapper())
+                .combiner(new StringIntegerCombinerFactory())
                 .reducer(new MovementsByAirportReducer())
                 .submit();
         try {
@@ -206,6 +209,7 @@ public class Client {
 
         ICompletableFuture<List<Map.Entry<String, Integer>>> future = job
                 .mapper( new DestinyAirportPerSrcAirportMapper(srcOaci))
+                .combiner(new StringIntegerCombinerFactory())
                 .reducer( new DestinyAiportPerSrcAirportReducer())
                 .submit(new DestinyAirportBySrcAirportCollator(quantityOfResults, airportsMap));
         try {
@@ -243,6 +247,7 @@ public class Client {
 
         ICompletableFuture<List<Map.Entry<String, Integer>>> future = job
                 .mapper( new MovementsMapperSrcDest() )
+                .combiner(new StringIntegerCombinerFactory())
                 .reducer( new MovementPairsReducer() )
                 .submit( new SrcDestToProvinceCollator2(airportsMap));
 
@@ -262,6 +267,7 @@ public class Client {
 
             ICompletableFuture<List<Map.Entry<String, Integer>>> future2 = job2
                     .mapper(new IdentityMap2())
+                    .combiner(new StringIntegerCombinerFactory())
                     .reducer(new MovementPairsReducer())
                     .submit( new MovementPairsCollator(1000, airportsMap));
 

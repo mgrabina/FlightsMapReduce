@@ -9,6 +9,6 @@ public class CabotageMovementsMapper implements Mapper<String, Movement, String,
 
     @Override
     public void map(String code, Movement movement, Context<String, Integer> context) {
-        context.emit(movement.getAirline(), 1);
+            context.emit(movement.getAirline(), 1);
     }
 }
