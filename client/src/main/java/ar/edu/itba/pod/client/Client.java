@@ -73,7 +73,6 @@ public class Client {
         CSVhelper.loadFlights(flightsList, flightsDataFile);
 
         timestamp.write("Fin de la lectura del archivo");
-        Long millis = System.currentTimeMillis();
 
         // Configure job
         final KeyValueSource<String, Movement> flightsSource = KeyValueSource.fromList(flightsList);
@@ -94,8 +93,7 @@ public class Client {
             default: System.out.println("Error");
         }
 
-        millis = System.currentTimeMillis() - millis;
-        timestamp.write("Fin del trabajo map/reduce. Duración: " + millis + " milisegundos.");
+
 
         timestamp.close();
 
@@ -127,6 +125,7 @@ public class Client {
     }
 
     private static void query1(Job job, Map<String, Airport> airports, String outPath){
+        Long millis = System.currentTimeMillis();
 
         ICompletableFuture<Map<String, Integer>> future = job
                 .mapper( new MovementsByAirportMapper() )
@@ -134,6 +133,8 @@ public class Client {
                 .submit();
         try {
             Map<String, Integer> result = future.get();
+            millis = System.currentTimeMillis() - millis;
+            timestamp.write("Fin del trabajo map/reduce. Duración: " + millis + " milisegundos.");
             CSVhelper.writeQuery1Csv(outPath, result, airports);
         } catch (Exception e) {
             System.out.println("No pudimos procesar la información.");
@@ -143,6 +144,7 @@ public class Client {
     }
 
     private static void query2(Job job, Integer quantityOfResults, String outPath){
+        Long millis = System.currentTimeMillis();
 
         ICompletableFuture<List<Map.Entry<String, Double>>> future = job
                 .mapper( new CabotageMovementsMapper() )
@@ -150,6 +152,8 @@ public class Client {
                 .submit(new CabotageMovementsPerAirlineCollator(quantityOfResults));
         try {
             List<Map.Entry<String, Double>> result = future.get();
+            millis = System.currentTimeMillis() - millis;
+            timestamp.write("Fin del trabajo map/reduce. Duración: " + millis + " milisegundos.");
             CSVhelper.writeQuery2Csv(outPath, result);
         } catch (Exception e){
             System.out.println("No pudimos procesar la información.");
@@ -158,6 +162,7 @@ public class Client {
     }
 
     private static void query3(Job job, String outPath){
+        Long millis = System.currentTimeMillis();
 
         ICompletableFuture<Map<String, Integer>> future = job
                 .mapper(new MovementsByAirportMapper())
@@ -166,7 +171,6 @@ public class Client {
         try {
             Map<String, Integer> result = future.get();
             IMap<String, Integer> partialMapQ3 = hInstance.getMap("q3-aux");
-
             for (Map.Entry<String, Integer> entry : result.entrySet()) {
                 partialMapQ3.put(entry.getKey(), entry.getValue());
             }
@@ -181,7 +185,8 @@ public class Client {
                     .submit(new GroupByAmountCollator());
 
             Map<Integer, Set<Map.Entry<String, String>>> result2 = future2.get();
-
+            millis = System.currentTimeMillis() - millis;
+            timestamp.write("Fin del trabajo map/reduce. Duración: " + millis + " milisegundos.");
             CSVhelper.writeQuery3Csv(outPath, result2);
         } catch (Exception e){
             System.out.println("No pudimos procesar la información.");
@@ -192,6 +197,7 @@ public class Client {
 
     private static void query4(Job job, Integer quantityOfResults,
                                Map<String, Airport> airportsMap, final String srcOaci, String outPath){
+        Long millis = System.currentTimeMillis();
 
         ICompletableFuture<List<Map.Entry<String, Integer>>> future = job
                 .mapper( new DestinyAirportPerSrcAirportMapper(srcOaci))
@@ -199,6 +205,8 @@ public class Client {
                 .submit(new DestinyAirportBySrcAirportCollator(quantityOfResults, airportsMap));
         try {
             List<Map.Entry<String, Integer>> results = future.get();
+            millis = System.currentTimeMillis() - millis;
+            timestamp.write("Fin del trabajo map/reduce. Duración: " + millis + " milisegundos.");
             CSVhelper.writeQuery4Csv(outPath, results);
         } catch (Exception e){
             System.out.println("No pudimos procesar la información.");
@@ -208,6 +216,7 @@ public class Client {
 
     private static void query5(Job job, Integer quantityOfResults, Map<String, Airport> airportsMap,
                                String outPath){
+        Long millis = System.currentTimeMillis();
 
         ICompletableFuture<List<Map.Entry<String, Double>>> future = job
                 .mapper( new PrivateMovementsMapper() )
@@ -215,6 +224,8 @@ public class Client {
                 .submit(new PrivateMovementsPerAirlineCollator(quantityOfResults, airportsMap));
         try {
             List<Map.Entry<String, Double>> result = future.get();
+            millis = System.currentTimeMillis() - millis;
+            timestamp.write("Fin del trabajo map/reduce. Duración: " + millis + " milisegundos.");
             CSVhelper.writeQuery5Csv(outPath, result);
         } catch (Exception e){
             System.out.println("No pudimos procesar la información.");
@@ -223,6 +234,7 @@ public class Client {
     }
 
     private static void query6(Job job, Map<String, Airport> airportsMap, Integer min, String outPath){
+        Long millis = System.currentTimeMillis();
 
         ICompletableFuture<List<Map.Entry<String, Integer>>> future = job
                 .mapper( new MovementsMapperSrcDest() )
@@ -249,6 +261,8 @@ public class Client {
                     .submit( new MovementPairsCollator(1000, airportsMap));
 
             List<Map.Entry<String,Integer>> result2 = future2.get();
+            millis = System.currentTimeMillis() - millis;
+            timestamp.write("Fin del trabajo map/reduce. Duración: " + millis + " milisegundos.");
 
             CSVhelper.writeQuery6Csv(outPath, result2);
         } catch (Exception e){
