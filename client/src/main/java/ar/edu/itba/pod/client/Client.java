@@ -3,6 +3,8 @@ package ar.edu.itba.pod.client;
 import ar.edu.itba.pod.api.Airport;
 import ar.edu.itba.pod.api.Movement;
 import ar.edu.itba.pod.api.collators.*;
+import ar.edu.itba.pod.api.combiners.CabotageMovementsCombinerFactory;
+import ar.edu.itba.pod.api.keypredicates.CabotageKeyPredicate;
 import ar.edu.itba.pod.api.mappers.*;
 import ar.edu.itba.pod.api.mappers.CabotageMovementsMapper;
 import ar.edu.itba.pod.api.mappers.MovementsByAirportMapper;
@@ -145,7 +147,10 @@ public class Client {
     private static void query2(Job job, Integer quantityOfResults, String outPath){
 
         ICompletableFuture<List<Map.Entry<String, Double>>> future = job
+//                .keyPredicate(new CabotageKeyPredicate())
                 .mapper( new CabotageMovementsMapper() )
+//                .combiner(new CabotageMovementsCombinerFactory())
+
                 .reducer( new CabotagePercentageReducer() )
                 .submit(new CabotageMovementsPerAirlineCollator(quantityOfResults));
         try {
