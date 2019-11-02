@@ -66,8 +66,8 @@ public class Client {
         hazelcastCfg.setNetworkConfig(net);
 
         hInstance = HazelcastClient.newHazelcastClient(hazelcastCfg);
-        final Map<String, Airport> airportsMap = hInstance.getReplicatedMap("airport-list");
-        final IMap<String, Movement> flightsMap = hInstance.getMap("flights-map");
+        final Map<String, Airport> airportsMap = hInstance.getReplicatedMap("airport-list-" + System.currentTimeMillis());
+        final IMap<String, Movement> flightsMap = hInstance.getMap("flights-map-" + System.currentTimeMillis());
         airportsMap.clear();
         flightsMap.clear();
 
