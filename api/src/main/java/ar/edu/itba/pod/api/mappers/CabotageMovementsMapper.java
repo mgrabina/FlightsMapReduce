@@ -9,6 +9,7 @@ public class CabotageMovementsMapper implements Mapper<String, Movement, String,
 
     @Override
     public void map(String code, Movement movement, Context<String, Integer> context) {
+        if (movement.getFlightType() == Movement.FlightType.CABOTAGE)
             context.emit(movement.getAirline(), 1);
     }
 }

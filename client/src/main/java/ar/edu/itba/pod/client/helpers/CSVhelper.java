@@ -18,7 +18,7 @@ import java.util.*;
 import static java.lang.System.exit;
 
 public class CSVhelper {
-    private static DecimalFormat df2 = new DecimalFormat("#.##");
+    private static DecimalFormat df2 = new DecimalFormat("#,##0.00");
 
 
     public static void loadAirports(Map<String, Airport> map, String file) {
@@ -112,6 +112,7 @@ public class CSVhelper {
     }
 
     public static void writeQuery5Csv(String file, List<Map.Entry<String, Double>> results) {
+        df2.setRoundingMode(RoundingMode.DOWN);
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(file + "/query5.csv"));
             final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.newFormat(';')
