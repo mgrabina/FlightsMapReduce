@@ -2,9 +2,9 @@
 
 cd client/target/
 if [ ! -d "$DIR" ]; then
-  tar -xzf FlightsMapReduce-client-1.0-SNAPSHOT-bin.tar.gz
+  tar -xzf tpe2-g9-client-1.0-SNAPSHOT-bin.tar.gz
 fi
-cd FlightsMapReduce-client-1.0-SNAPSHOT/
+cd tpe2-g9-client-1.0-SNAPSHOT/
 
 chmod u+x query3.sh
 

@@ -2,9 +2,9 @@
 
 cd server/target/
 if [ ! -d "$DIR" ]; then
-  tar -xzf FlightsMapReduce-server-1.0-SNAPSHOT-bin.tar.gz
+  tar -xzf tpe2-g9-server-1.0-SNAPSHOT-bin.tar.gz
 fi
-cd FlightsMapReduce-server-1.0-SNAPSHOT/
+cd tpe2-g9-server-1.0-SNAPSHOT/
 
 chmod u+x server.sh
 
